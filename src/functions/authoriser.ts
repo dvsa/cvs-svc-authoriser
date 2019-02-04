@@ -23,7 +23,7 @@ const authoriser: Handler = async (event: any, context: Context): Promise<Policy
     const [authorization, token] = event.authorizationToken.split(" ");
 
     if (authorization !== "Bearer") {
-        context.fail("Authorization methods accepted: Bearer.\nEvent dump:\n${event}\nContext dump:\n${context}");
+        context.fail(`Authorization methods accepted: Bearer.\nEvent dump:\n${event}\nContext dump:\n${context}`);
         return undefined;
     }
 
@@ -43,9 +43,7 @@ const authoriser: Handler = async (event: any, context: Context): Promise<Policy
         ];
         const policyDocument: PolicyDocument = { Version: "2012-10-17", Statement: statements };
 
-        let policy = new Policy(token.sub, policyDocument, "some_key", { context: "test" });
-
-        return new Policy(token.sub, policyDocument, "some_key", { context: "test" });
+        return new Policy(token.sub, policyDocument);
     })
     .catch((error: StatusCodeError | AuthorizationError | JsonWebTokenError | NotBeforeError | TokenExpiredError) => {
         if (error instanceof StatusCodeError) {
@@ -63,16 +61,16 @@ const authoriser: Handler = async (event: any, context: Context): Promise<Policy
             .setAction("execute-api:Invoke")
             .setEffect(Effect.Deny)
             .setResourceRegion("eu-west-1")
-            .setResourceAccountId("acc_id")
-            .setResourceApiId("api_id")
-            .setResourceStageName("production")
+            .setResourceAccountId("*")
+            .setResourceApiId("*")
+            .setResourceStageName("*")
             .setResourceHttpVerb("*")
             .setResourcePathSpecifier("*")
             .build()
         ];
         const policyDocument: PolicyDocument = { Version: "2012-10-17", Statement: statements };
 
-        return new Policy("Unauthorised", policyDocument, "some_key");
+        return new Policy("Unauthorised", policyDocument);
     });
 
 };
