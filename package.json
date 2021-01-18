@@ -3,20 +3,24 @@
   "version": "1.0.0",
   "description": "Lambda authoriser for validating a user's Azure AD JWT and generating an access policy.",
   "main": "handler.js",
+  "engines": {
+    "node": "10.18.1"
+  },
   "scripts": {
     "build": "node_modules/typescript/bin/tsc --rootDir ./ --outDir build --sourceMap false && npm run build:copy && npm run build:install",
     "build:copy": "cp package.json package-lock.json build && cd src && find ./**/*.yml | cpio -pdm ../build",
     "build:install": "cd build && npm install --production",
-    "test": "BRANCH=local jest --testMatch=\"**/*.unitTest.ts\" --coverage",
+    "test": "BRANCH=local jest --testMatch=\"**/*.unitTest.ts\"",
     "package": "cd build && mkdir config && cd config && touch config.yml && cd ../ && cp -r package.json package-lock.json config src/ && cd src && npm ci --production && rm package.json package-lock.json && zip -qr ../../${ZIP_NAME}.zip .",
     "test-i": "echo \"No Current Int Tests\"",
-    "prepush": "BRANCH=local npm test && npm run tslint",
+    "prepush": "npm run coverage && npm run build",
     "predeploy": "npm install && npm run prepush",
     "security-checks": "git secrets --scan && git log -p | scanrepo",
     "tslint": "tslint src/**/*.ts tests/**/*.ts",
     "sonar-scanner": "npm run tslint && npm run coverage && sonar-scanner",
-    "coverage": "BRANCH=local jest --testMatch=\"**/*.*Test.ts\" --runInBand --coverage",
-    "audit-dep": "npm audit --json | audit-filter --nsp-config=.nsprc --audit=-",
+    "coverage": "BRANCH=local jest --testMatch=\"**/*.unitTest.ts\" --runInBand --coverage",
+    "audit:check": "npm audit --json | audit-filter --nsp-config=.nsprc --audit=-",
+    "audit-dep": "npm audit",
     "tools-setup": "echo 'Nothing to do'"
   },
   "author": "",
@@ -61,7 +65,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run prepush && npm run security-checks",
+      "pre-commit": "npm run security-checks && npm audit && npm run tslint",
       "pre-push": "npm run prepush"
     }
   }
