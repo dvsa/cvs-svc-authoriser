@@ -1,117 +1,91 @@
-import {JWTService} from "../../src/services/JWTService";
-import {handler} from "../../src/handler";
+import {APIGatewayTokenAuthorizerEvent, Context} from "aws-lambda";
 import {StatusCodeError} from "request-promise/errors";
+import {authoriser} from "../../src/functions/authoriser";
+import {JWTService} from "../../src/services/JWTService";
+import {IncomingMessage} from "http";
 import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
+import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
+import {Effect} from "../../src/models/IAM/Effect";
 
 jest.mock("../../src/utils/GetConfig");
-describe("Lambda Authoriser", () => {
-  describe("when authorisation header is not present", () => {
-    const CONTEXT = {
-      isFailed: false,
-      failureReason: "",
-      fail(failureString: any) {
-        this.isFailed = true;
-        this.failureReason = failureString;
-      }
-    };
 
-    const event = {
-      type: "TOKEN",
-      authorizationToken: "",
-      methodArn: "arn:aws:execute-api:eu-west-2:*:*/*/*/*"
-    };
+const event: APIGatewayTokenAuthorizerEvent = {
+  type: 'TOKEN',
+  authorizationToken: 'Bearer myBearerToken',
+  methodArn: 'arn:aws:execute-api:eu-west-1:*:*/*/*/*'
+};
 
-    it("should fail", () => {
-      return handler(event, CONTEXT)
-        .then(() => {
-          expect(CONTEXT.isFailed).toEqual(true);
-        });
-    });
+describe('authoriser() unit tests', () => {
+
+  it('should fail on blank authorization token', async () => {
+    await expectUnauthorised({...event, authorizationToken: ''});
   });
 
-  describe("when authorisation method is not BEARER", () => {
-    const CONTEXT = {
-      isFailed: false,
-      failureReason: "",
-      fail(failureString: any) {
-        this.isFailed = true;
-        this.failureReason = failureString;
-      }
-    };
-
-    const event = {
-      type: "TOKEN",
-      authorizationToken: "BASIC",
-      methodArn: "arn:aws:execute-api:eu-west-2:*:*/*/*/*"
-    };
-
-    it("should fail", () => {
-      return handler(event, CONTEXT)
-        .then(() => {
-          expect(CONTEXT.isFailed).toEqual(true);
-        });
-    });
+  it('should fail on non-Bearer authorization token', async () => {
+    await expectUnauthorised({...event, authorizationToken: 'not a bearer'});
   });
 
-  describe("when authorisation method is BEARER", () => {
-    const CONTEXT = {
-      isFailed: false,
-      failureReason: "",
-      fail(failureString: any) {
-        this.isFailed = true;
-        this.failureReason = failureString;
-      }
-    };
+  it('should fail when Bearer prefix is present, but token value isn\'t', async () => {
+    await expectUnauthorised({...event, authorizationToken: 'Bearer'});
+  });
 
-    const event = {
-      type: "TOKEN",
-      authorizationToken: "Bearer",
-      methodArn: "arn:aws:execute-api:eu-west-2:*:*/*/*/*"
-    };
-    beforeEach(() => {
-      jest.resetModules();
-    });
-    describe("and the token is not valid", () => {
-      it("should fail, returning `Unauthorised`", () => {
-        JWTService.prototype.verify = jest.fn().mockRejectedValue("unauthorised");
-        return handler(event, CONTEXT)
-          .then((data: any) => {
-            expect(data.principalId).toEqual("Unauthorised");
-          });
-      });
-    });
+  it('should fail when Bearer prefix is present, but token value is blank', async () => {
+    await expectUnauthorised({...event, authorizationToken: 'Bearer      '});
+  });
 
-    describe("and the JWT service throws a StatusCodeError", () => {
-      it("should fail, returning undefined", () => {
-        // @ts-ignore
-        const myError = new StatusCodeError(418, "Oh no! StatuscodeError!");
-        JWTService.prototype.verify = jest.fn().mockRejectedValue(myError);
-        return handler(event, CONTEXT)
-          .then((data: any) => {
-            expect(data).toEqual(undefined);
-          });
-      });
-    });
-    describe("and the JWT service throws an AuthorizationError", () => {
-      it("should fail, returning `Unauthorised`", () => {
-        // @ts-ignore
-        const myError = new AuthorizationError(418, "Oh no! AuthorizationError!");
-        JWTService.prototype.verify = jest.fn().mockRejectedValue(myError);
-        return handler(event, CONTEXT)
-          .then((data: any) => {
-            expect(data.principalId).toEqual("Unauthorised");
-          });
-      });
-    });
-    describe("and the token is valid", () => {
-      it("should return an authorised policy", () => {
-        JWTService.prototype.verify = jest.fn().mockResolvedValue({sub: "authorised"});
-        return handler(event, CONTEXT)
-          .then((data: any) => {
-            expect(data.principalId).toEqual("authorised");
-            expect(data.policyDocument.Statement[0].Effect).toEqual("Allow");
-          });
-      });
-    });
+  it('should fail on invalid JWT token', async () => {
+    JWTService.prototype.verify = jest.fn().mockRejectedValue(new Error("invalid token"));
+
+    await expectUnauthorised(event);
+  });
+
+  it('should fail on non-2xx HTTP status', async () => {
+    JWTService.prototype.verify = jest.fn().mockRejectedValue(
+      new StatusCodeError(418, 'I\'m a teapot', { url: 'http://example.org' }, {} as IncomingMessage)
+    );
+
+    await expectUnauthorised(event);
+  });
+
+  it('should fail on JWT authorization error', async () => {
+    JWTService.prototype.verify = jest.fn().mockRejectedValue(
+      new AuthorizationError('test-authorization-error')
+    );
+
+    await expectUnauthorised(event);
+  });
+
+  it('should pass on valid JWT', async () => {
+    JWTService.prototype.verify = jest.fn().mockResolvedValue(
+      { sub: 'any-authorised' }
+    );
+
+    const returnValue: APIGatewayAuthorizerResult = await authoriser(event, exampleContext());
+
+    await expect(returnValue.principalId).toEqual('any-authorised');
+    await expect(returnValue.policyDocument.Statement[0].Effect).toEqual(Effect.Allow);
   });
 });
+
+const expectUnauthorised = async (e: APIGatewayTokenAuthorizerEvent) => {
+  await expect(authoriser(e, exampleContext())).resolves.toMatchObject({
+    principalId: 'Unauthorised'
+  });
+};
+
+const exampleContext = (): Context => {
+  return {
+    callbackWaitsForEmptyEventLoop: false,
+    functionName: 'test',
+    functionVersion: '0.0.0',
+    invokedFunctionArn: 'arn:aws:execute-api:eu-west-1:TEST',
+    memoryLimitInMB: '128',
+    awsRequestId: 'TEST-AWS-REQUEST-ID',
+    logGroupName: 'TEST-LOG-GROUP-NAME',
+    logStreamName: 'TEST-LOG-STREAM-NAME',
+    getRemainingTimeInMillis: (): number => 86400000,
+    done: (): void => { /* circumvent TSLint no-empty */ },
+    fail: (): void => { /* circumvent TSLint no-empty */ },
+    succeed: (): void => { /* circumvent TSLint no-empty */ },
+  };
+};
