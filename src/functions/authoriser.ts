@@ -1,7 +1,6 @@
 import {APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement} from "aws-lambda";
 import StatementBuilder from "../models/IAM/StatementBuilder";
 import {JWTService} from "../services/JWTService";
-import {Effect} from "../models/IAM/Effect";
 import {StatusCodeError} from "request-promise/errors";
 import IConfig from "../utils/IConfig";
 import getConfig from "../utils/GetConfig";
@@ -26,14 +25,7 @@ export const authoriser: any = async (event: APIGatewayTokenAuthorizerEvent, con
 
     const statements: Statement[] = [
       new StatementBuilder()
-        .setAction("execute-api:Invoke")
-        .setEffect(Effect.Allow)
-        .setResourceRegion("eu-west-1")
-        .setResourceAccountId("*")
-        .setResourceApiId("*")
-        .setResourceStageName("*")
-        .setResourceHttpVerb("*")
-        .setResourcePathSpecifier("*")
+        .setEffect('Allow')
         .build()
     ];
 
@@ -50,14 +42,8 @@ export const authoriser: any = async (event: APIGatewayTokenAuthorizerEvent, con
 
     const statements: Statement[] = [
       new StatementBuilder()
-        .setAction("execute-api:Invoke")
-        .setEffect(Effect.Deny)
-        .setResourceRegion("eu-west-1")
-        .setResourceAccountId("*")
-        .setResourceApiId("*")
-        .setResourceStageName("*")
-        .setResourceHttpVerb("*")
-        .setResourcePathSpecifier("*")
+        .setAction('execute-api:Invoke')
+        .setEffect('Deny')
         .build()
     ];
 

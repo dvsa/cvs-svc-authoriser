@@ -5,7 +5,6 @@ import {JWTService} from "../../src/services/JWTService";
 import {IncomingMessage} from "http";
 import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
-import {Effect} from "../../src/models/IAM/Effect";
 
 jest.mock("../../src/utils/GetConfig");
 
@@ -63,7 +62,7 @@ describe('authoriser() unit tests', () => {
     const returnValue: APIGatewayAuthorizerResult = await authoriser(event, exampleContext());
 
     await expect(returnValue.principalId).toEqual('any-authorised');
-    await expect(returnValue.policyDocument.Statement[0].Effect).toEqual(Effect.Allow);
+    await expect(returnValue.policyDocument.Statement[0].Effect).toEqual('Allow');
   });
 });
 

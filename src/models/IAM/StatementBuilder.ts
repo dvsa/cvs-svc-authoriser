@@ -1,25 +1,20 @@
-import {Action} from "./index";
+import {Action, Effect, HttpVerb} from "./index";
 import {Statement} from "aws-lambda";
-import {Effect} from "./Effect";
 
-/**
- * Builder class for building a Statement object
- */
-class StatementBuilder {
-  private Action: string | null = null;
-  private Effect: string | null = null;
-  private Resource: string = "arn:aws:execute-api:";
+// see https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
+export default class StatementBuilder {
 
-  /**
-   * Setter for the Statement's Action
-   * @param action - action for this statement
-   * @returns StatementBuilder
-   */
-  public setAction(action: Action): StatementBuilder {
-    this.Action = action;
+  private effect: Effect = 'Deny';
+  private action: Action = 'execute-api:Invoke';
 
-    return this;
-  }
+  // Resource fields
+  private regionId: string = process.env.AWS_REGION || 'eu-west-1';
+  private accountId: string = '*';
+  private apiId: string = '*';
+  private stage: string = '*';
+  private httpVerb: HttpVerb = '*';
+  private resource: string | null = null;
+  private childResource: string | null = null;
 
   /**
    * Setter for the Statement's Effect
@@ -27,19 +22,27 @@ class StatementBuilder {
    * @returns StatementBuilder
    */
   public setEffect(effect: Effect): StatementBuilder {
-    this.Effect = effect;
+    this.effect = effect;
+    return this;
+  }
 
+  /**
+   * Setter for the Statement's Action
+   * @param action - action for this statement
+   * @returns StatementBuilder
+   */
+  public setAction(action: Action): StatementBuilder {
+    this.action = action;
     return this;
   }
 
   /**
    * Setter for the Statement's resource region
-   * @param region - the ARN's region
+   * @param regionId - the ARN's region
    * @returns StatementBuilder
    */
-  public setResourceRegion(region: string): StatementBuilder {
-    this.Resource += `${region}:`;
-
+  public setRegionId(regionId: string): StatementBuilder {
+    this.regionId = regionId;
     return this;
   }
 
@@ -48,9 +51,8 @@ class StatementBuilder {
    * @param accountId - the ARN's account-id
    * @returns StatementBuilder
    */
-  public setResourceAccountId(accountId: string): StatementBuilder {
-    this.Resource += `${accountId}:`;
-
+  public setAccountId(accountId: string): StatementBuilder {
+    this.accountId = accountId;
     return this;
   }
 
@@ -59,20 +61,18 @@ class StatementBuilder {
    * @param apiId - the ARN's API id
    * @returns StatementBuilder
    */
-  public setResourceApiId(apiId: string): StatementBuilder {
-    this.Resource += `${apiId}/`;
-
+  public setApiId(apiId: string): StatementBuilder {
+    this.apiId = apiId;
     return this;
   }
 
   /**
    * Setter for the Statement's resource stage-name
-   * @param stageName - the ARN's stage-name
+   * @param stage - the ARN's stage-name
    * @returns StatementBuilder
    */
-  public setResourceStageName(stageName: string): StatementBuilder {
-    this.Resource += `${stageName}/`;
-
+  public setStage(stage: string): StatementBuilder {
+    this.stage = stage;
     return this;
   }
 
@@ -81,20 +81,28 @@ class StatementBuilder {
    * @param httpVerb - the ARN's HTTP verb
    * @returns StatementBuilder
    */
-  public setResourceHttpVerb(httpVerb: string): StatementBuilder {
-    this.Resource += `${httpVerb}/`;
-
+  public setHttpVerb(httpVerb: HttpVerb): StatementBuilder {
+    this.httpVerb = httpVerb;
     return this;
   }
 
   /**
    * Setter for the Statement's resource path specifier
-   * @param resourcePathSpecifier - the ARN's path specifier
+   * @param resource - the ARN's path specifier
    * @returns StatementBuilder
    */
-  public setResourcePathSpecifier(resourcePathSpecifier: string): StatementBuilder {
-    this.Resource += resourcePathSpecifier;
+  public setResource(resource: string | null): StatementBuilder {
+    this.resource = resource;
+    return this;
+  }
 
+  /**
+   * Setter for the Statement's child resource path specifier
+   * @param childResource - the ARN's child path specifier
+   * @returns StatementBuilder
+   */
+  public setChildResource(childResource: string | null): StatementBuilder {
+    this.childResource = childResource;
     return this;
   }
 
@@ -103,12 +111,20 @@ class StatementBuilder {
    * @returns the Statement that has been built
    */
   public build(): Statement {
+    let resource = `arn:aws:execute-api:${this.regionId}:${this.accountId}:${this.apiId}/${this.stage}/${this.httpVerb}/`;
+
+    if (this.resource) {
+      resource += `${this.resource}/`;
+
+      if (this.childResource) {
+        resource += this.childResource;
+      }
+    }
+
     return {
-      Action: this.Action as string,
-      Effect: this.Effect as string,
-      Resource: this.Resource
+      Action: this.action as string,
+      Effect: this.effect as string,
+      Resource: resource
     };
   }
 }
-
-export default StatementBuilder;
