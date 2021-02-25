@@ -24,14 +24,12 @@ class JWTService {
     }
 
     const endpoint = config.azure.jwk_endpoint.replace(":tennant", config.azure.tennant);
-    return this.fetchJWK(endpoint, decodedToken.header.kid)
-      .then((x5c: string) => {
-        const issuer = config.azure.issuer.replace(":tennant", config.azure.tennant);
-        const certificate = `-----BEGIN CERTIFICATE-----\n${x5c}\n-----END CERTIFICATE-----`;
+    const x5c = await this.fetchJWK(endpoint, decodedToken.header.kid)
 
-        return JWT.verify(token, certificate, {audience: decodedToken.payload.aud, issuer, algorithms: ["RS256"]});
-        // return JWT.verify(token, certificate, { audience: config.azure.appId, issuer, algorithms: ["RS256"] });
-      });
+    const issuer = config.azure.issuer.replace(":tennant", config.azure.tennant);
+    const certificate = `-----BEGIN CERTIFICATE-----\n${x5c}\n-----END CERTIFICATE-----`;
+
+    return JWT.verify(token, certificate, {audience: decodedToken.payload.aud, issuer, algorithms: ["RS256"]});
   }
 
   /**
@@ -52,7 +50,6 @@ class JWTService {
     });
     return isAtLeastOneRoleValid;
   }
-
 
   /**
    * Fetch the public key
