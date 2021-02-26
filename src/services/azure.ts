@@ -7,11 +7,11 @@ export const getCertificateChain = async (jsonWebKeySetUri: string, keyId: strin
 
   const certificateChain = keys.get(keyId);
 
-  if (certificateChain) {
-    return certificateChain;
-  } else {
+  if (!certificateChain) {
     throw new AuthorizationError(ERRORMESSAGES.NO_MATCHING_PUBLIC_KEY_FOUND);
   }
+
+  return certificateChain;
 }
 
 const getKeys = async (jsonWebKeySetUri: string) => {
