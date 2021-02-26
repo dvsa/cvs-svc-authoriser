@@ -1,7 +1,7 @@
 import {JWTService} from "../../src/services/JWTService";
 import * as JWT from "jsonwebtoken";
 import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
-import IConfig from "../../src/utils/IConfig";
+import IConfig from "../../src/models/IConfig";
 import {getCertificateChain} from "../../src/services/azure";
 
 jest.mock("jsonwebtoken", () => {

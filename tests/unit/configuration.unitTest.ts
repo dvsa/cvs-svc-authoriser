@@ -1,5 +1,5 @@
 import {safeDump} from "js-yaml";
-import IConfig from "../../src/utils/IConfig";
+import IConfig from "../../src/models/IConfig";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
 import configuration from "../../src/services/configuration";
 

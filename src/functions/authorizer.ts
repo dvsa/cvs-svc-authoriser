@@ -2,7 +2,7 @@ import {APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement} from
 import StatementBuilder from "../services/StatementBuilder";
 import {JWTService} from "../services/JWTService";
 import {StatusCodeError} from "request-promise/errors";
-import IConfig from "../utils/IConfig";
+import IConfig from "../models/IConfig";
 import configuration from "../services/configuration";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
 

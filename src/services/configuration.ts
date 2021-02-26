@@ -1,5 +1,5 @@
 import {safeLoad} from "js-yaml";
-import IConfig from "../utils/IConfig";
+import IConfig from "../models/IConfig";
 import {getSecret} from "./secrets";
 
 export default async function configuration(): Promise<IConfig> {
