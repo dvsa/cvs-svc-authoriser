@@ -1,7 +1,5 @@
 import StatementBuilder from "../../src/services/StatementBuilder";
 
-jest.mock("../../src/services/configuration");
-
 describe('StatementBuilder', (): void => {
   it('should return default properties if no setters are used', (): void => {
     // cast to 'any' - AWS api-gateway-authorizer.d.ts model
