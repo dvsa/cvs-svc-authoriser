@@ -1,6 +1,6 @@
 import axios from "axios";
 import AuthorizationError from "../models/exceptions/AuthorizationError";
-import {ERRORMESSAGES} from "../assets/enum";
+import {NO_MATCHING_PUBLIC_KEY_FOUND} from "../models/exceptions/errors";
 
 export const getCertificateChain = async (jsonWebKeySetUri: string, keyId: string): Promise<string> => {
   const keys: Map<string, string> = await getKeys(jsonWebKeySetUri);
@@ -8,7 +8,7 @@ export const getCertificateChain = async (jsonWebKeySetUri: string, keyId: strin
   const certificateChain = keys.get(keyId);
 
   if (!certificateChain) {
-    throw new AuthorizationError(ERRORMESSAGES.NO_MATCHING_PUBLIC_KEY_FOUND);
+    throw new AuthorizationError(NO_MATCHING_PUBLIC_KEY_FOUND);
   }
 
   return certificateChain;

@@ -1,6 +1,6 @@
 import nock from "nock";
 import {getCertificateChain} from "../../src/services/azure";
-import {ERRORMESSAGES} from "../../src/assets/enum";
+import {NO_MATCHING_PUBLIC_KEY_FOUND} from "../../src/models/exceptions/errors";
 
 describe('getCertificateChain()', () => {
   it('should return an x5c given an existing key ID', async (): Promise<void> => {
@@ -15,7 +15,7 @@ describe('getCertificateChain()', () => {
     setUpKey('somethingElse', 'mySuperSecurePublicKey');
 
     await expect(getCertificateChain('http://localhost/tenantId/discovery/keys', 'keyToTheKingdom'))
-      .rejects.toThrowError(ERRORMESSAGES.NO_MATCHING_PUBLIC_KEY_FOUND);
+      .rejects.toThrowError(NO_MATCHING_PUBLIC_KEY_FOUND);
   });
 
   const setUpKey = (keyId: string, publicKey: string) => {
