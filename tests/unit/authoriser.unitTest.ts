@@ -6,7 +6,7 @@ import {IncomingMessage} from "http";
 import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
 
-jest.mock("../../src/utils/configuration");
+jest.mock("../../src/services/configuration");
 
 const event: APIGatewayTokenAuthorizerEvent = {
   type: 'TOKEN',

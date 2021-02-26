@@ -1,6 +1,6 @@
 import {safeLoad} from "js-yaml";
-import IConfig from "./IConfig";
-import {getSecret} from "../services/secrets";
+import IConfig from "../utils/IConfig";
+import {getSecret} from "./secrets";
 
 export default async function configuration(): Promise<IConfig> {
   if (process.env.SECRET_NAME) {
