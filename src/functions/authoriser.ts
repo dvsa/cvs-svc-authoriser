@@ -1,5 +1,5 @@
 import {APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement} from "aws-lambda";
-import StatementBuilder from "../models/IAM/StatementBuilder";
+import StatementBuilder from "../services/StatementBuilder";
 import {JWTService} from "../services/JWTService";
 import {StatusCodeError} from "request-promise/errors";
 import IConfig from "../utils/IConfig";

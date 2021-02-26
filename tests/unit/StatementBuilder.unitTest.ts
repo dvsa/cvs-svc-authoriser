@@ -1,4 +1,4 @@
-import StatementBuilder from "../../src/models/IAM/StatementBuilder";
+import StatementBuilder from "../../src/services/StatementBuilder";
 
 jest.mock("../../src/utils/GetConfig");
 

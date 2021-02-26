@@ -1,4 +1,4 @@
-import {Action, Effect, HttpVerb} from "./index";
+import {Action, Effect, HttpVerb} from "../models/IAM";
 import {Statement} from "aws-lambda";
 
 // see https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
