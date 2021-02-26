@@ -1,8 +1,8 @@
 import * as JWT from "jsonwebtoken";
-import * as http from "request-promise";
 import AuthorizationError from "../models/exceptions/AuthorizationError";
 import {ALLOWEDROLES, ERRORMESSAGES} from "../assets/enum";
 import IConfig from "../utils/IConfig";
+import {getCertificateChain} from "./azure";
 
 class JWTService {
 
@@ -24,10 +24,10 @@ class JWTService {
     }
 
     const endpoint = config.azure.jwk_endpoint.replace(":tennant", config.azure.tennant);
-    const x5c = await this.fetchJWK(endpoint, decodedToken.header.kid)
 
     const issuer = config.azure.issuer.replace(":tennant", config.azure.tennant);
-    const certificate = `-----BEGIN CERTIFICATE-----\n${x5c}\n-----END CERTIFICATE-----`;
+
+    const certificate = await getCertificateChain(endpoint, decodedToken.header.kid);
 
     return JWT.verify(token, certificate, {audience: decodedToken.payload.aud, issuer, algorithms: ["RS256"]});
   }
@@ -50,28 +50,6 @@ class JWTService {
     });
     return isAtLeastOneRoleValid;
   }
-
-  /**
-   * Fetch the public key
-   * @param endpoint
-   * @param kid
-   */
-  public async fetchJWK(endpoint: string, kid: string): Promise<string> {
-    return http.get(endpoint)
-      .then((body: string) => {
-        return JSON.parse(body);
-      })
-      .then((JWKs: any) => {
-        const publicKey: any = JWKs.keys.find((key: any) => key.kid === kid);
-
-        if (!publicKey) {
-          throw new AuthorizationError(ERRORMESSAGES.NO_MATCHING_PUBLIC_KEY_FOUND);
-        }
-
-        return publicKey.x5c[0];
-      });
-  }
-
 }
 
 export {JWTService};
