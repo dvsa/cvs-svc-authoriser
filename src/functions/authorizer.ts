@@ -13,7 +13,7 @@ import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authori
  * @param context - AWS Lambda Context object
  * @returns - Promise<Policy | undefined>
  */
-export const authoriser: any = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
+export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   const config: IConfig = await configuration();
 
   const jwtService = new JWTService();

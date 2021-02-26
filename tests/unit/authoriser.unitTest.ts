@@ -1,6 +1,6 @@
 import {APIGatewayTokenAuthorizerEvent, Context} from "aws-lambda";
 import {StatusCodeError} from "request-promise/errors";
-import {authoriser} from "../../src/functions/authoriser";
+import {authorizer} from "../../src/functions/authorizer";
 import {JWTService} from "../../src/services/JWTService";
 import {IncomingMessage} from "http";
 import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
@@ -59,7 +59,7 @@ describe('authoriser() unit tests', () => {
       { sub: 'any-authorised' }
     );
 
-    const returnValue: APIGatewayAuthorizerResult = await authoriser(event, exampleContext());
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     await expect(returnValue.principalId).toEqual('any-authorised');
     await expect(returnValue.policyDocument.Statement[0].Effect).toEqual('Allow');
@@ -67,7 +67,7 @@ describe('authoriser() unit tests', () => {
 });
 
 const expectUnauthorised = async (e: APIGatewayTokenAuthorizerEvent) => {
-  await expect(authoriser(e, exampleContext())).resolves.toMatchObject({
+  await expect(authorizer(e, exampleContext())).resolves.toMatchObject({
     principalId: 'Unauthorised'
   });
 };
