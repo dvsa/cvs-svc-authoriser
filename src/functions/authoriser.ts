@@ -3,7 +3,7 @@ import StatementBuilder from "../services/StatementBuilder";
 import {JWTService} from "../services/JWTService";
 import {StatusCodeError} from "request-promise/errors";
 import IConfig from "../utils/IConfig";
-import getConfig from "../utils/GetConfig";
+import configuration from "../utils/configuration";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
 
 /**
@@ -14,7 +14,7 @@ import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authori
  * @returns - Promise<Policy | undefined>
  */
 export const authoriser: any = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
-  const config: IConfig = await getConfig();
+  const config: IConfig = await configuration();
 
   const jwtService = new JWTService();
 

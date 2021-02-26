@@ -1,6 +1,6 @@
 import StatementBuilder from "../../src/services/StatementBuilder";
 
-jest.mock("../../src/utils/GetConfig");
+jest.mock("../../src/utils/configuration");
 
 describe('StatementBuilder', (): void => {
   it('should return default properties if no setters are used', (): void => {

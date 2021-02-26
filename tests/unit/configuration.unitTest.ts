@@ -1,7 +1,7 @@
 import {safeDump} from "js-yaml";
 import IConfig from "../../src/utils/IConfig";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
-import getConfig from "../../src/utils/GetConfig";
+import configuration from "../../src/utils/configuration";
 
 describe("getConfig", () => {
   const mockConf: IConfig = {
@@ -22,7 +22,7 @@ describe("getConfig", () => {
     });
     SecretsManager.prototype.getSecretValue = mockFn;
     it("should retrieve a configuration file from SecretsManager", async () => {
-      const conf = await getConfig();
+      const conf = await configuration();
       expect.assertions(3);
       expect(conf).toStrictEqual(mockConf);
       expect(mockFn.mock.calls.length).toBe(1);
@@ -36,7 +36,7 @@ describe("getConfig", () => {
         }
       }));
       expect.assertions(1);
-      await expect(getConfig()).rejects.toThrowError(errMsg);
+      await expect(configuration()).rejects.toThrowError(errMsg);
     });
     afterAll(() => {
       jest.resetAllMocks();
@@ -45,7 +45,7 @@ describe("getConfig", () => {
   });
   context("when SECRET_NAME env var not set", () => {
     it("should throw an Error", async () => {
-      await expect(getConfig()).rejects.toThrowError("SECRET_NAME environment variable not set!");
+      await expect(configuration()).rejects.toThrowError("SECRET_NAME environment variable not set!");
     });
   });
 });
