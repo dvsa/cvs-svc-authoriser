@@ -1,7 +1,7 @@
 import {JWTService} from "../../src/services/JWTService";
 import * as JWT from "jsonwebtoken";
 import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
-import IConfig from "../../src/models/IConfig";
+import AuthorizerConfig from "../../src/models/AuthorizerConfig";
 import {getCertificateChain} from "../../src/services/azure";
 
 jest.mock("jsonwebtoken", () => {
@@ -119,7 +119,7 @@ describe("JWTService", () => {
     context("with missing config items", () => {
       context("missing all", () => {
         it("it throws AuthorisationError", async () => {
-          const mockConf: IConfig = {
+          const mockConf: AuthorizerConfig = {
             azure: {
               tennant: "",
               appId: "",
@@ -140,7 +140,7 @@ describe("JWTService", () => {
     });
     context("missing Tenant details", () => {
       it("it throws AuthorisationError", async () => {
-        const mockConf: IConfig = {
+        const mockConf: AuthorizerConfig = {
           azure: {
             tennant: "",
             appId: "123abc",
@@ -160,7 +160,7 @@ describe("JWTService", () => {
     });
     context("missing jwk_endpoint details", () => {
       it("it throws AuthorisationError", async () => {
-        const mockConf: IConfig = {
+        const mockConf: AuthorizerConfig = {
           azure: {
             tennant: "abc123",
             appId: "123abc",
@@ -180,7 +180,7 @@ describe("JWTService", () => {
     });
     context("missing issuer details", () => {
       it("it throws AuthorisationError", async () => {
-        const mockConf: IConfig = {
+        const mockConf: AuthorizerConfig = {
           azure: {
             tennant: "abc123",
             appId: "123abc",
@@ -200,7 +200,7 @@ describe("JWTService", () => {
     });
     context("missing appID details", () => {
       it("it throws AuthorisationError", async () => {
-        const mockConf: IConfig = {
+        const mockConf: AuthorizerConfig = {
           azure: {
             tennant: "abc123",
             appId: "",
@@ -221,7 +221,7 @@ describe("JWTService", () => {
   });
   context("with AtLeastOneValidRole = true", () => {
     it("invokes fetchJWK", async () => {
-      const mockConf: IConfig = {
+      const mockConf: AuthorizerConfig = {
         azure: {
           tennant: "abc123",
           appId: "123abc",
@@ -240,7 +240,7 @@ describe("JWTService", () => {
   });
   context("with AtLeastOneValidRole = false", () => {
     it("it throws AuthorisationError", async () => {
-      const mockConf: IConfig = {
+      const mockConf: AuthorizerConfig = {
         azure: {
           tennant: "abc123",
           appId: "123abc",

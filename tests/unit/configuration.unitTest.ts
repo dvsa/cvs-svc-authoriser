@@ -1,10 +1,10 @@
 import {safeDump} from "js-yaml";
-import IConfig from "../../src/models/IConfig";
+import AuthorizerConfig from "../../src/models/AuthorizerConfig";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
 import configuration from "../../src/services/configuration";
 
 describe("getConfig", () => {
-  const mockConf: IConfig = {
+  const mockConf: AuthorizerConfig = {
     azure: {
       tennant: "asdf",
       appId: "asdf",

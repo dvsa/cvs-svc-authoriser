@@ -1,4 +1,4 @@
-export default interface IConfig {
+export default interface AuthorizerConfig {
   azure: {
     tennant: string
     appId: string

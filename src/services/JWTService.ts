@@ -1,7 +1,7 @@
 import * as JWT from "jsonwebtoken";
 import AuthorizationError from "../models/exceptions/AuthorizationError";
 import {ALLOWEDROLES, ERRORMESSAGES} from "../assets/enum";
-import IConfig from "../models/IConfig";
+import AuthorizerConfig from "../models/AuthorizerConfig";
 import {getCertificateChain} from "./azure";
 
 class JWTService {
@@ -11,7 +11,7 @@ class JWTService {
    * @param token
    * @param config
    */
-  public async verify(token: string, config: IConfig): Promise<string | object> {
+  public async verify(token: string, config: AuthorizerConfig): Promise<string | object> {
     const decodedToken: any = JWT.decode(token, {complete: true});
 
     // Check if config is valid
