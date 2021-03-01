@@ -1,10 +1,10 @@
 import {APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement} from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
-import {JWTService} from "../services/JWTService";
 import {StatusCodeError} from "request-promise/errors";
-import AuthorizerConfig from "../models/AuthorizerConfig";
-import configuration from "../services/configuration";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
+import {checkSignature} from "../services/signature-check";
+import {getValidRoles} from "../services/roles";
+import {getValidJwt} from "../services/tokens";
 
 /**
  * Lambda custom authoriser function to verify whether a JWT has been provided
@@ -14,14 +14,19 @@ import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authori
  * @returns - Promise<Policy | undefined>
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
-  const config: AuthorizerConfig = await configuration();
-
-  const jwtService = new JWTService();
-
   try {
-    const bearerToken = getBearerToken(event, context);
-    // TODO refactor this to just object...
-    const jwt: object | string = await jwtService.verify(bearerToken, config);
+    const jwt = getValidJwt(event.authorizationToken);
+
+    const validRoles = getValidRoles(jwt);
+
+    if (validRoles.length === 0) {
+      console.error('no valid roles on token')
+      return unauthorisedPolicy();
+    }
+
+    await checkSignature(jwt);
+
+    // TODO at this point, roles are guaranteed valid (signature checked). Now, take the roles and make a policy from them.
 
     const statements: Statement[] = [
       new StatementBuilder()
@@ -30,7 +35,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     ];
 
     return {
-      principalId: (jwt as any).sub,
+      principalId: jwt.payload.sub,
       policyDocument: newPolicyDocument(statements)
     }
   } catch (error: any) {
@@ -39,45 +44,24 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     } else {
       console.error(error.message);
     }
+    dumpArguments(event, context);
 
-    const statements: Statement[] = [
-      new StatementBuilder()
-        .setAction('execute-api:Invoke')
-        .setEffect('Deny')
-        .build()
-    ];
-
-    return {
-      principalId: 'Unauthorised',
-      policyDocument: newPolicyDocument(statements)
-    }
+    return unauthorisedPolicy();
   }
 };
 
-const getBearerToken = (event: APIGatewayTokenAuthorizerEvent, context: Context): string => {
-  if (!event.authorizationToken) {
-    reportFailure(event, context);
-    throw new Error('no caller-supplied-token (no authorization header on original request)');
+const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
+  const statements: Statement[] = [
+    new StatementBuilder()
+      .setAction('execute-api:Invoke')
+      .setEffect('Deny')
+      .build()
+  ];
+
+  return {
+    principalId: 'Unauthorised',
+    policyDocument: newPolicyDocument(statements)
   }
-
-  const [bearerPrefix, token] = event.authorizationToken.split(' ');
-
-  if ('Bearer' !== bearerPrefix) {
-    reportFailure(event, context);
-    throw new Error('caller-supplied-token must start with \'Bearer \' (case-sensitive)');
-  }
-
-  if (!token || !token.trim()) {
-    reportFailure(event, context);
-    throw new Error('\'Bearer \' prefix present, but token is blank or missing');
-  }
-
-  return token;
-}
-
-const reportFailure = (event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
-  console.error('Event dump:   ', JSON.stringify(event));
-  console.error('Context dump: ', JSON.stringify(context));
 }
 
 const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
@@ -85,4 +69,9 @@ const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
     Version: '2012-10-17',
     Statement: statements
   }
+}
+
+const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
+  console.error('Event dump:   ', JSON.stringify(event));
+  console.error('Context dump: ', JSON.stringify(context));
 }

@@ -1,12 +1,13 @@
 import {APIGatewayTokenAuthorizerEvent, Context} from "aws-lambda";
 import {StatusCodeError} from "request-promise/errors";
 import {authorizer} from "../../src/functions/authorizer";
-import {JWTService} from "../../src/services/JWTService";
 import {IncomingMessage} from "http";
 import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
-
-jest.mock("../../src/services/configuration");
+import {checkSignature} from "../../src/services/signature-check";
+import {getValidRoles} from "../../src/services/roles";
+import jwtJson from '../resources/jwt.json';
+import {getValidJwt} from "../../src/services/tokens";
 
 const event: APIGatewayTokenAuthorizerEvent = {
   type: 'TOKEN',
@@ -16,30 +17,19 @@ const event: APIGatewayTokenAuthorizerEvent = {
 
 describe('authoriser() unit tests', () => {
 
-  it('should fail on blank authorization token', async () => {
-    await expectUnauthorised({...event, authorizationToken: ''});
-  });
+  beforeEach(() => {
+    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([{
+      name: 'a-role',
+      access: 'read'
+    }]);
 
-  it('should fail on non-Bearer authorization token', async () => {
-    await expectUnauthorised({...event, authorizationToken: 'not a bearer'});
-  });
-
-  it('should fail when Bearer prefix is present, but token value isn\'t', async () => {
-    await expectUnauthorised({...event, authorizationToken: 'Bearer'});
-  });
-
-  it('should fail when Bearer prefix is present, but token value is blank', async () => {
-    await expectUnauthorised({...event, authorizationToken: 'Bearer      '});
-  });
-
-  it('should fail on invalid JWT token', async () => {
-    JWTService.prototype.verify = jest.fn().mockRejectedValue(new Error("invalid token"));
-
-    await expectUnauthorised(event);
-  });
+    (checkSignature as jest.Mock) = jest.fn().mockImplementation(() => {
+      /* circumvent TSLint no-empty */
+    });
+  })
 
   it('should fail on non-2xx HTTP status', async () => {
-    JWTService.prototype.verify = jest.fn().mockRejectedValue(
+    (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(
       new StatusCodeError(418, 'I\'m a teapot', { url: 'http://example.org' }, {} as IncomingMessage)
     );
 
@@ -47,7 +37,7 @@ describe('authoriser() unit tests', () => {
   });
 
   it('should fail on JWT authorization error', async () => {
-    JWTService.prototype.verify = jest.fn().mockRejectedValue(
+    (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(
       new AuthorizationError('test-authorization-error')
     );
 
@@ -55,13 +45,10 @@ describe('authoriser() unit tests', () => {
   });
 
   it('should pass on valid JWT', async () => {
-    JWTService.prototype.verify = jest.fn().mockResolvedValue(
-      { sub: 'any-authorised' }
-    );
-
+    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
-    await expect(returnValue.principalId).toEqual('any-authorised');
+    await expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
     await expect(returnValue.policyDocument.Statement[0].Effect).toEqual('Allow');
   });
 });
