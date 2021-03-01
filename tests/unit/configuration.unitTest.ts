@@ -2,50 +2,109 @@ import {safeDump} from "js-yaml";
 import AuthorizerConfig from "../../src/models/AuthorizerConfig";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
 import configuration from "../../src/services/configuration";
+import {AZURE_CONFIGURATION_NOT_VALID} from "../../src/models/exceptions/errors";
 
-describe("getConfig", () => {
-  const mockConf: AuthorizerConfig = {
+describe("configuration()", () => {
+  const OLD_ENV = process.env;
+
+  const mockConfig: AuthorizerConfig = {
     azure: {
-      tennant: "asdf",
-      appId: "asdf",
-      issuer: "asdf",
-      jwk_endpoint: "asdf"
+      tennant: "a UUID v4",
+      appId: "a UUID v4",
+      issuer: "sts.windows.net",
+      jwk_endpoint: "login.microsoft.com"
     }
   };
-  const mockConfYaml = safeDump(mockConf);
-  const mockFn = jest.fn();
-  context("when SECRET_NAME env var set", () => {
-    beforeAll(() => {
-      process.env.SECRET_NAME = "fakeSecret";
-      jest.mock("aws-sdk/clients/secretsmanager");
-      mockFn.mockImplementation(() => ({promise: () => ({SecretString: mockConfYaml})}));
+
+  beforeAll((): void => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV }; // (clone)
+    setUpSecret(safeDump(mockConfig))
+  });
+
+  afterAll(() => {
+    process.env = OLD_ENV;
+  });
+
+  it('should fail if env.SECRET_NAME is not set', async (): Promise<void> => {
+    await expect(configuration()).rejects.toThrowError('SECRET_NAME environment variable not set!');
+  });
+
+  context('when env.SECRET_NAME is set', () => {
+    beforeEach(() => {
+      process.env.SECRET_NAME = 'any';
     });
-    SecretsManager.prototype.getSecretValue = mockFn;
-    it("should retrieve a configuration file from SecretsManager", async () => {
-      const conf = await configuration();
-      expect.assertions(3);
-      expect(conf).toStrictEqual(mockConf);
-      expect(mockFn.mock.calls.length).toBe(1);
-      expect(mockFn.mock.results[0].value.promise()).toStrictEqual({SecretString: mockConfYaml});
+
+    it('should successfully return config', async (): Promise<void> => {
+      setUpSecret(safeDump(mockConfig));
+      await expect(configuration()).resolves.toStrictEqual(mockConfig);
     });
-    it("should throw an error if AWS SDK throws an error", async () => {
-      const errMsg = "This is a fake error from AWS";
-      mockFn.mockImplementationOnce(() => ({
-        promise: () => {
-          throw new Error(errMsg);
+
+    it('should fail if AWS throws error', async (): Promise<void> => {
+      SecretsManager.prototype.getSecretValue = jest.fn().mockImplementationOnce(
+        () => ({
+          promise: () => { throw new Error('fake AWS error') }
+        })
+      );
+
+      await expect(configuration()).rejects.toThrowError('fake AWS error');
+    });
+
+    it('should fail if configuration object is null', async (): Promise<void> => {
+      setUpSecret('');
+      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
+    });
+
+    it('should fail if Azure tenant is null', async (): Promise<void> => {
+      const config = {
+        ...mockConfig,
+        azure: {
+          tennant: null
         }
-      }));
-      expect.assertions(1);
-      await expect(configuration()).rejects.toThrowError(errMsg);
+      };
+      setUpSecret(safeDump(config));
+      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
     });
-    afterAll(() => {
-      jest.resetAllMocks();
-      delete process.env.SECRET_NAME;
+
+    it('should fail if Azure appId is null', async (): Promise<void> => {
+      const config = {
+        ...mockConfig,
+        azure: {
+          appId: null
+        }
+      };
+      setUpSecret(safeDump(config));
+      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
+    });
+
+    it('should fail if Azure issuer is null', async (): Promise<void> => {
+      const config = {
+        ...mockConfig,
+        azure: {
+          issuer: null
+        }
+      };
+      setUpSecret(safeDump(config));
+      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
+    });
+
+    it('should fail if Azure jwk_endpoint is null', async (): Promise<void> => {
+      const config = {
+        ...mockConfig,
+        azure: {
+          jwk_endpoint: null
+        }
+      };
+      setUpSecret(safeDump(config));
+      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
     });
   });
-  context("when SECRET_NAME env var not set", () => {
-    it("should throw an Error", async () => {
-      await expect(configuration()).rejects.toThrowError("SECRET_NAME environment variable not set!");
-    });
-  });
+
+  const setUpSecret = (secretString: string): void => {
+    SecretsManager.prototype.getSecretValue = jest.fn().mockImplementation(
+      () => ({
+        promise: () => ({ SecretString: secretString })
+      })
+    );
+  }
 });

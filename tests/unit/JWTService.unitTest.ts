@@ -115,110 +115,6 @@ describe("JWTService", () => {
     });
   });
 
-  describe("Verify function", () => {
-    context("with missing config items", () => {
-      context("missing all", () => {
-        it("it throws AuthorisationError", async () => {
-          const mockConf: AuthorizerConfig = {
-            azure: {
-              tennant: "",
-              appId: "",
-              issuer: "",
-              jwk_endpoint: ""
-            }
-          };
-          const srv = new JWTService();
-          expect.assertions(2);
-          try {
-            await srv.verify("abc123", mockConf);
-          } catch (e) {
-            expect(e).toBeInstanceOf(AuthorizationError);
-            expect(e.message).toEqual("Azure configuration is not valid.");
-          }
-        });
-      });
-    });
-    context("missing Tenant details", () => {
-      it("it throws AuthorisationError", async () => {
-        const mockConf: AuthorizerConfig = {
-          azure: {
-            tennant: "",
-            appId: "123abc",
-            issuer: "https://sts.windows.net/:tennant/",
-            jwk_endpoint: "https://login.microsoftonline.com/:tennant/discovery/keys"
-          }
-        };
-        const srv = new JWTService();
-        expect.assertions(2);
-        try {
-          await srv.verify("abc123", mockConf);
-        } catch (e) {
-          expect(e).toBeInstanceOf(AuthorizationError);
-          expect(e.message).toEqual("Azure configuration is not valid.");
-        }
-      });
-    });
-    context("missing jwk_endpoint details", () => {
-      it("it throws AuthorisationError", async () => {
-        const mockConf: AuthorizerConfig = {
-          azure: {
-            tennant: "abc123",
-            appId: "123abc",
-            issuer: "https://sts.windows.net/:tennant/",
-            jwk_endpoint: ""
-          }
-        };
-        const srv = new JWTService();
-        expect.assertions(2);
-        try {
-          await srv.verify("abc123", mockConf);
-        } catch (e) {
-          expect(e).toBeInstanceOf(AuthorizationError);
-          expect(e.message).toEqual("Azure configuration is not valid.");
-        }
-      });
-    });
-    context("missing issuer details", () => {
-      it("it throws AuthorisationError", async () => {
-        const mockConf: AuthorizerConfig = {
-          azure: {
-            tennant: "abc123",
-            appId: "123abc",
-            issuer: "",
-            jwk_endpoint: "https://login.microsoftonline.com/:tennant/discovery/keys"
-          }
-        };
-        const srv = new JWTService();
-        expect.assertions(2);
-        try {
-          await srv.verify("abc123", mockConf);
-        } catch (e) {
-          expect(e).toBeInstanceOf(AuthorizationError);
-          expect(e.message).toEqual("Azure configuration is not valid.");
-        }
-      });
-    });
-    context("missing appID details", () => {
-      it("it throws AuthorisationError", async () => {
-        const mockConf: AuthorizerConfig = {
-          azure: {
-            tennant: "abc123",
-            appId: "",
-            issuer: "https://sts.windows.net/:tennant/",
-            jwk_endpoint: "https://login.microsoftonline.com/:tennant/discovery/keys"
-          }
-        };
-        const srv = new JWTService();
-        expect.assertions(2);
-        try {
-          await srv.verify("abc123", mockConf);
-        } catch (e) {
-          expect(e).toBeInstanceOf(AuthorizationError);
-          expect(e.message).toEqual("Azure configuration is not valid.");
-        }
-      });
-    });
-  });
   context("with AtLeastOneValidRole = true", () => {
     it("invokes fetchJWK", async () => {
       const mockConf: AuthorizerConfig = {
@@ -238,6 +134,7 @@ describe("JWTService", () => {
       expect(output).toEqual(true);
     });
   });
+
   context("with AtLeastOneValidRole = false", () => {
     it("it throws AuthorisationError", async () => {
       const mockConf: AuthorizerConfig = {
@@ -252,13 +149,14 @@ describe("JWTService", () => {
       JWTService.prototype.isAtLeastOneRoleValid = jest.fn().mockReturnValue(false);
       const srv = new JWTService();
       const myToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjFMVE16YWtpaGlSbGFfOHoyQkVKVlhlV01xbyJ9.eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTEyMjA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFJa3pxRlZyU2FTYUZIeTc4MmJidGFRIiwiYXVkIjoiNmNiMDQwMTgtYTNmNS00NmE3LWI5OTUtOTQwYzc4ZjVhZWYzIiwiZXhwIjoxNTM2MzYxNDExLCJpYXQiOjE1MzYyNzQ3MTEsIm5iZiI6MTUzNjI3NDcxMSwibmFtZSI6IkFiZSBMaW5jb2xuIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiQWJlTGlAbWljcm9zb2Z0LmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC02NmYzLTMzMzJlY2E3ZWE4MSIsInRpZCI6IjkxMjIwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsIm5vbmNlIjoiMTIzNTIzIiwiYWlvIjoiRGYyVVZYTDFpeCFsTUNXTVNPSkJjRmF0emNHZnZGR2hqS3Y4cTVnMHg3MzJkUjVNQjVCaXN2R1FPN1lXQnlqZDhpUURMcSFlR2JJRGFreXA1bW5PcmNkcUhlWVNubHRlcFFtUnA2QUlaOGpZIn0.1AFWW-Ck5nROwSlltm7GzZvDwUkqvhSQpm55TQsmVo9Y59cLhRXpvB8n-55HCr9Z6G_31_UbeUkoz612I2j_Sm9FFShSDDjoaLQr54CreGIJvjtmS3EkK9a7SJBbcpL1MpUtlfygow39tFjY7EVNW9plWUvRrTgVk7lYLprvfzw-CIqw3gHC-T7IK_m_xkr08INERBtaecwhTeN4chPC4W3jdmw_lIxzC48YoQ0dB1L9-ImX98Egypfrlbm0IBL5spFzL6JDZIRRJOu8vecJvj1mq-IUhGt0MacxX8jdxYLP-KUu2d9MbNKpCKJuZ7p8gwTL5B7NlUdh_dmSviPWrw";
-      expect.assertions(2);
       try {
         await srv.verify(myToken, mockConf);
       } catch (e) {
+        expect(myMock.mock.calls.length).toEqual(0);
         expect(e).toBeInstanceOf(AuthorizationError);
         expect(e.message).toEqual("Invalid roles");
       }
+      expect.assertions(3);
     });
   });
 });

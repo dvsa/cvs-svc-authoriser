@@ -3,7 +3,6 @@ import AuthorizationError from "../models/exceptions/AuthorizationError";
 import {ALLOWEDROLES} from "../assets/enum";
 import AuthorizerConfig from "../models/AuthorizerConfig";
 import {getCertificateChain} from "./azure";
-import {AZURE_CONFIGURATION_NOT_VALID} from "../models/exceptions/errors";
 
 class JWTService {
 
@@ -14,11 +13,6 @@ class JWTService {
    */
   public async verify(token: string, config: AuthorizerConfig): Promise<string | object> {
     const decodedToken: any = JWT.decode(token, {complete: true});
-
-    // Check if config is valid
-    if (!config || !config.azure || !config.azure.tennant || !config.azure.appId || !config.azure.issuer || !config.azure.jwk_endpoint) {
-      throw new AuthorizationError(AZURE_CONFIGURATION_NOT_VALID);
-    }
 
     if (!this.isAtLeastOneRoleValid(decodedToken)) {
       throw new AuthorizationError("Invalid roles");

@@ -11,8 +11,9 @@ export const getSecret = async (secretId: string): Promise<string> => {
 
   const response: GetSecretValueResponse = await getSecretsManager().getSecretValue(request).promise();
 
-  if (!response.SecretString || !response.SecretString.trim()) {
-    throw new Error(`Secret '${secretId}' is null or blank`);
+  // as this class is generic, an empty secret could be acceptable - check only if-undefined
+  if (response.SecretString === undefined) {
+    throw new Error(`Secret '${secretId}' is null`);
   }
 
   return response.SecretString!;

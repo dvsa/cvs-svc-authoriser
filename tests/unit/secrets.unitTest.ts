@@ -21,7 +21,7 @@ describe('getSecret()', (): void => {
           if (request.SecretId === secretId) {
             return { SecretString: secretValue };
           }
-          return { SecretString: '' }
+          return { SecretString: undefined }
         }
       })
     );
