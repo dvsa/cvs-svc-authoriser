@@ -14,7 +14,7 @@ export const getCertificateChain = async (jsonWebKeySetUri: string, keyId: strin
   return certificateChain;
 }
 
-const getKeys = async (jsonWebKeySetUri: string) => {
+const getKeys = async (jsonWebKeySetUri: string): Promise<Map<string, string>> => {
   const response = await axios.get(jsonWebKeySetUri);
 
   const map: Map<string, string> = new Map();
