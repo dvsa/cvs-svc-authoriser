@@ -1,6 +1,6 @@
 import {safeDump} from "js-yaml";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
-import {configuration, AuthorizerConfig} from "../../src/services/configuration";
+import {configuration, AuthorizerConfig} from "../../../src/services/configuration";
 import * as fs from "fs";
 
 describe("configuration()", () => {

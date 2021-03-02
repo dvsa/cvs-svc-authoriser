@@ -1,13 +1,13 @@
 import {APIGatewayTokenAuthorizerEvent, Context} from "aws-lambda";
 import {StatusCodeError} from "request-promise/errors";
-import {authorizer} from "../../src/functions/authorizer";
+import {authorizer} from "../../../src/functions/authorizer";
 import {IncomingMessage} from "http";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
-import {checkSignature} from "../../src/services/signature-check";
-import {getValidRoles} from "../../src/services/roles";
-import jwtJson from '../resources/jwt.json';
-import {getValidJwt} from "../../src/services/tokens";
-import {configuration} from "../../src/services/configuration";
+import {checkSignature} from "../../../src/services/signature-check";
+import {getValidRoles} from "../../../src/services/roles";
+import jwtJson from '../../resources/jwt.json';
+import {getValidJwt} from "../../../src/services/tokens";
+import {configuration} from "../../../src/services/configuration";
 import * as fs from "fs";
 import {safeLoad} from "js-yaml";
 

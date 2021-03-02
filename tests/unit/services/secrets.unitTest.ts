@@ -1,5 +1,5 @@
 import SecretsManager, {GetSecretValueRequest} from "aws-sdk/clients/secretsmanager";
-import {getSecret} from "../../src/services/secrets";
+import {getSecret} from "../../../src/services/secrets";
 
 describe('getSecret()', (): void => {
   it('should return SecretString if secret exists', async (): Promise<void> => {

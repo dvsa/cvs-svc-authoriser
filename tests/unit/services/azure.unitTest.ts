@@ -1,5 +1,5 @@
 import nock from "nock";
-import {getCertificateChain} from "../../src/services/azure";
+import {getCertificateChain} from "../../../src/services/azure";
 
 describe('getCertificateChain()', () => {
   it('should return an x5c given an existing key ID', async (): Promise<void> => {

@@ -1,4 +1,4 @@
-import {arnToString, ResourceArn, stringToArn} from "../../src/services/resource-arn";
+import {arnToString, ResourceArn, stringToArn} from "../../../src/services/resource-arn";
 
 describe('arnToString()', () => {
   it('should return correct string representation of ARN', () => {

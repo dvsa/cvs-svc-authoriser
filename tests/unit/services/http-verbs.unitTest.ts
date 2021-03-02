@@ -1,4 +1,4 @@
-import {isSafe, toHttpVerb} from "../../src/services/http-verbs";
+import {isSafe, toHttpVerb} from "../../../src/services/http-verbs";
 
 describe('toHttpVerb()', () => {
   it('should return correct httpVerb from string', () => {

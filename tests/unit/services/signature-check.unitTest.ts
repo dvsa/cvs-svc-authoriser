@@ -1,7 +1,7 @@
 import * as jsonWebToken from "jsonwebtoken";
-import {getCertificateChain} from "../../src/services/azure";
-import jwtJson from '../resources/jwt.json';
-import {checkSignature} from "../../src/services/signature-check";
+import {getCertificateChain} from "../../../src/services/azure";
+import jwtJson from '../../resources/jwt.json';
+import {checkSignature} from "../../../src/services/signature-check";
 
 jest.mock('jsonwebtoken', () => ({
   verify: jest.fn().mockImplementationOnce((token, _certificate, _options) => token)

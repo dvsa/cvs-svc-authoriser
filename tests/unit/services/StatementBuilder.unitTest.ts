@@ -1,4 +1,4 @@
-import StatementBuilder from "../../src/services/StatementBuilder";
+import StatementBuilder from "../../../src/services/StatementBuilder";
 
 describe('StatementBuilder', (): void => {
   it('should return default properties if no setters are used', (): void => {

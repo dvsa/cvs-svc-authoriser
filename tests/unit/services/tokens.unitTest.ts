@@ -1,4 +1,4 @@
-import {getValidJwt} from "../../src/services/tokens";
+import {getValidJwt} from "../../../src/services/tokens";
 
 describe('getValidJwt()', () => {
   it('should fail on blank authorization token', async () => {

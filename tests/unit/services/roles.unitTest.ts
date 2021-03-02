@@ -1,4 +1,4 @@
-import Role, {getValidRoles} from "../../src/services/roles";
+import Role, {getValidRoles} from "../../../src/services/roles";
 
 describe('getValidRoles()', () => {
   it('should return list of valid roles if there are any', () => {
