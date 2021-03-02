@@ -1,6 +1,9 @@
-import {Action, Effect, HttpVerb} from "../models/IAM";
+import {HttpVerb} from "./http-verbs";
 import {Statement} from "aws-lambda";
 import {arnToString} from "./resource-arn";
+
+export type Effect = 'Allow' | 'Deny';
+export type Action = "execute-api:Invoke" | "execute-api:api:InvalidateCache" | "execute-api:*";
 
 // see https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
 export default class StatementBuilder {

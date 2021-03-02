@@ -1,9 +1,11 @@
+import {HttpVerb, toHttpVerb} from "./http-verbs";
+
 export interface ResourceArn {
   region: string
   accountId: string,
   apiId: string,
   stage: string,
-  httpVerb: string,
+  httpVerb: HttpVerb,
   resource: string | null,
   childResource: string | null
 }
@@ -66,7 +68,7 @@ export const stringToArn = (input: string): ResourceArn => {
     accountId: parts[4],
     apiId: pathParts[0],
     stage: pathParts[1],
-    httpVerb: pathParts[2],
+    httpVerb: toHttpVerb(pathParts[2]),
     resource,
     childResource
   }
