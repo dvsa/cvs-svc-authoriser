@@ -1,19 +1,21 @@
 import {safeDump} from "js-yaml";
-import AuthorizerConfig from "../../src/models/AuthorizerConfig";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
-import configuration from "../../src/services/configuration";
+import {configuration, AuthorizerConfig} from "../../src/services/configuration";
 import {AZURE_CONFIGURATION_NOT_VALID} from "../../src/models/exceptions/errors";
+import * as fs from "fs";
 
 describe("configuration()", () => {
   const OLD_ENV = process.env;
 
   const mockConfig: AuthorizerConfig = {
-    azure: {
-      tennant: "a UUID v4",
-      appId: "a UUID v4",
-      issuer: "sts.windows.net",
-      jwk_endpoint: "login.microsoft.com"
-    }
+    roleToResources: [
+      {
+        roleName: 'a-role',
+        associatedResources: [
+          '/a-resource/with-child'
+        ]
+      }
+    ]
   };
 
   beforeAll((): void => {
@@ -36,14 +38,16 @@ describe("configuration()", () => {
     });
 
     it('should successfully return config', async (): Promise<void> => {
-      setUpSecret(safeDump(mockConfig));
+      setUpSecret(fs.readFileSync('tests/resources/fakeConfig.yml', 'utf-8'));
       await expect(configuration()).resolves.toStrictEqual(mockConfig);
     });
 
     it('should fail if AWS throws error', async (): Promise<void> => {
       SecretsManager.prototype.getSecretValue = jest.fn().mockImplementationOnce(
         () => ({
-          promise: () => { throw new Error('fake AWS error') }
+          promise: () => {
+            throw new Error('fake AWS error')
+          }
         })
       );
 
@@ -55,45 +59,10 @@ describe("configuration()", () => {
       await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
     });
 
-    it('should fail if Azure tenant is null', async (): Promise<void> => {
+    it('should fail if roleToResources is null', async (): Promise<void> => {
       const config = {
         ...mockConfig,
-        azure: {
-          tennant: null
-        }
-      };
-      setUpSecret(safeDump(config));
-      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
-    });
-
-    it('should fail if Azure appId is null', async (): Promise<void> => {
-      const config = {
-        ...mockConfig,
-        azure: {
-          appId: null
-        }
-      };
-      setUpSecret(safeDump(config));
-      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
-    });
-
-    it('should fail if Azure issuer is null', async (): Promise<void> => {
-      const config = {
-        ...mockConfig,
-        azure: {
-          issuer: null
-        }
-      };
-      setUpSecret(safeDump(config));
-      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
-    });
-
-    it('should fail if Azure jwk_endpoint is null', async (): Promise<void> => {
-      const config = {
-        ...mockConfig,
-        azure: {
-          jwk_endpoint: null
-        }
+        roleToResources: null
       };
       setUpSecret(safeDump(config));
       await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
@@ -103,7 +72,7 @@ describe("configuration()", () => {
   const setUpSecret = (secretString: string): void => {
     SecretsManager.prototype.getSecretValue = jest.fn().mockImplementation(
       () => ({
-        promise: () => ({ SecretString: secretString })
+        promise: () => ({SecretString: secretString})
       })
     );
   }

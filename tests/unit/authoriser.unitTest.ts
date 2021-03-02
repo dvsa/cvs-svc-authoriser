@@ -8,6 +8,9 @@ import {checkSignature} from "../../src/services/signature-check";
 import {getValidRoles} from "../../src/services/roles";
 import jwtJson from '../resources/jwt.json';
 import {getValidJwt} from "../../src/services/tokens";
+import {configuration} from "../../src/services/configuration";
+import * as fs from "fs";
+import {safeLoad} from "js-yaml";
 
 const event: APIGatewayTokenAuthorizerEvent = {
   type: 'TOKEN',
@@ -26,6 +29,8 @@ describe('authoriser() unit tests', () => {
     (checkSignature as jest.Mock) = jest.fn().mockImplementation(() => {
       /* circumvent TSLint no-empty */
     });
+
+    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync('tests/resources/fakeConfig.yml', 'utf-8')));
   })
 
   it('should fail on non-2xx HTTP status', async () => {
@@ -52,8 +57,10 @@ describe('authoriser() unit tests', () => {
     (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
-    await expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    await expect(returnValue.policyDocument.Statement[0].Effect).toEqual('Allow');
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+    for (const statement of returnValue.policyDocument.Statement) {
+      expect(statement.Effect).toEqual('Allow');
+    }
   });
 });
 

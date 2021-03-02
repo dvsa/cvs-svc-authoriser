@@ -1,6 +1,6 @@
 export type HttpVerb = '*' | 'HEAD' | 'OPTIONS' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'TRACE'
 
-const httpVerbs = [
+const httpVerbs: HttpVerb[] = [
   '*',
   'HEAD',
   'OPTIONS',
@@ -12,8 +12,12 @@ const httpVerbs = [
   'TRACE'
 ];
 
+export const availableHttpVerbs = (): HttpVerb[] => {
+  return httpVerbs;
+}
+
 export const toHttpVerb = (candidate: string): HttpVerb => {
-  if (!httpVerbs.includes(candidate.toUpperCase())) {
+  if (!(httpVerbs as string[]).includes(candidate.toUpperCase())) {
     throw new Error(`not a recognized HTTP verb: '${candidate}'`)
   }
 

@@ -2,11 +2,13 @@ import {APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement} from
 import StatementBuilder from "../services/StatementBuilder";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
 import {checkSignature} from "../services/signature-check";
-import {getValidRoles} from "../services/roles";
+import Role, {getValidRoles} from "../services/roles";
 import {getValidJwt} from "../services/tokens";
+import {configuration, AuthorizerConfig, getAssociatedResources} from "../services/configuration";
+import {availableHttpVerbs, isSafe} from "../services/http-verbs";
 
 /**
- * Lambda custom authoriser function to verify whether a JWT has been provided
+ * Lambda custom authorizer function to verify whether a JWT has been provided
  * and to verify its integrity and validity.
  * @param event - AWS Lambda event object
  * @param context - AWS Lambda Context object
@@ -14,6 +16,9 @@ import {getValidJwt} from "../services/tokens";
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   try {
+    // fail-fast if config is missing or invalid
+    const config: AuthorizerConfig = await configuration();
+
     const jwt = getValidJwt(event.authorizationToken);
 
     const validRoles = getValidRoles(jwt);
@@ -26,13 +31,12 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     await checkSignature(jwt);
 
-    // TODO at this point, roles are guaranteed valid (signature checked). Now, take the roles and make a policy from them.
+    let statements: Statement[] = [];
 
-    const statements: Statement[] = [
-      new StatementBuilder()
-        .setEffect('Allow')
-        .build()
-    ];
+    for (const role of validRoles) {
+      const items = roleToStatements(role, config);
+      statements = statements.concat(items);
+    }
 
     return {
       principalId: jwt.payload.sub,
@@ -46,10 +50,50 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
   }
 };
 
+const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => {
+  const associatedResources: string[] = getAssociatedResources(role, config);
+
+  const statements: Statement[] = [];
+
+  for (const associatedResource of associatedResources) {
+    const parts = associatedResource.substring(1).split('/');
+    const resource = parts[0];
+
+    let childResource = null;
+
+    if (parts.length > 1) {
+      childResource = parts.slice(1).join('/');
+    }
+
+    if (role.access === 'read') {
+      for (const httpVerb of availableHttpVerbs()) {
+        if (isSafe(httpVerb)) {
+          statements.push(new StatementBuilder()
+            .setEffect('Allow')
+            .setHttpVerb(httpVerb)
+            .setResource(resource)
+            .setChildResource(childResource)
+            .build()
+          );
+        }
+      }
+    } else {
+      statements.push(new StatementBuilder()
+        .setEffect('Allow')
+        .setHttpVerb('*')
+        .setResource(resource)
+        .setChildResource(childResource)
+        .build()
+      );
+    }
+  }
+
+  return statements;
+}
+
 const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
   const statements: Statement[] = [
     new StatementBuilder()
-      .setAction('execute-api:Invoke')
       .setEffect('Deny')
       .build()
   ];

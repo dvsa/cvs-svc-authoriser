@@ -2,8 +2,8 @@ import axios from "axios";
 import AuthorizationError from "../models/exceptions/AuthorizationError";
 import {NO_MATCHING_PUBLIC_KEY_FOUND} from "../models/exceptions/errors";
 
-export const getCertificateChain = async (jsonWebKeySetUri: string, keyId: string): Promise<string> => {
-  const keys: Map<string, string> = await getKeys(jsonWebKeySetUri);
+export const getCertificateChain = async (tenantId: string, keyId: string): Promise<string> => {
+  const keys: Map<string, string> = await getKeys(tenantId);
 
   const certificateChain = keys.get(keyId);
 
@@ -14,8 +14,8 @@ export const getCertificateChain = async (jsonWebKeySetUri: string, keyId: strin
   return certificateChain;
 }
 
-const getKeys = async (jsonWebKeySetUri: string): Promise<Map<string, string>> => {
-  const response = await axios.get(jsonWebKeySetUri);
+const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
+  const response = await axios.get(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
 
   const map: Map<string, string> = new Map();
 

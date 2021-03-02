@@ -7,19 +7,19 @@ describe('getCertificateChain()', () => {
     const publicKey = 'mySuperSecurePublicKey';
     setUpKey('keyToTheKingdom', publicKey);
 
-    await expect(getCertificateChain('http://localhost/tenantId/discovery/keys', 'keyToTheKingdom'))
+    await expect(getCertificateChain('tenantId', 'keyToTheKingdom'))
       .resolves.toEqual(`-----BEGIN CERTIFICATE-----\n${publicKey}\n-----END CERTIFICATE-----`);
   });
 
   it('should throw an error if no key matches the given key ID', async (): Promise<void> => {
     setUpKey('somethingElse', 'mySuperSecurePublicKey');
 
-    await expect(getCertificateChain('http://localhost/tenantId/discovery/keys', 'keyToTheKingdom'))
+    await expect(getCertificateChain('tenantId', 'keyToTheKingdom'))
       .rejects.toThrowError(NO_MATCHING_PUBLIC_KEY_FOUND);
   });
 
   const setUpKey = (keyId: string, publicKey: string) => {
-    nock('http://localhost')
+    nock('https://login.microsoftonline.com')
       .get('/tenantId/discovery/keys')
       .reply(200, JSON.stringify({
         keys: [
