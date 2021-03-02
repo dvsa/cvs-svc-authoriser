@@ -29,6 +29,8 @@ describe('authoriser() unit tests', () => {
   })
 
   it('should fail on non-2xx HTTP status', async () => {
+    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
+
     (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(
       new StatusCodeError(418, 'I\'m a teapot', { url: 'http://example.org' }, {} as IncomingMessage)
     );
@@ -37,6 +39,8 @@ describe('authoriser() unit tests', () => {
   });
 
   it('should fail on JWT authorization error', async () => {
+    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
+
     (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(
       new AuthorizationError('test-authorization-error')
     );

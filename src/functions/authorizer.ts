@@ -1,6 +1,5 @@
 import {APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement} from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
-import {StatusCodeError} from "request-promise/errors";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
 import {checkSignature} from "../services/signature-check";
 import {getValidRoles} from "../services/roles";
@@ -21,6 +20,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     if (validRoles.length === 0) {
       console.error('no valid roles on token')
+      dumpArguments(event, context);
       return unauthorisedPolicy();
     }
 
@@ -39,11 +39,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
       policyDocument: newPolicyDocument(statements)
     }
   } catch (error: any) {
-    if (error instanceof StatusCodeError) {
-      console.error(JSON.stringify(error.error));
-    } else {
-      console.error(error.message);
-    }
+    console.error(error.message);
     dumpArguments(event, context);
 
     return unauthorisedPolicy();
@@ -72,6 +68,6 @@ const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
 }
 
 const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
-  console.error('Event dump:   ', JSON.stringify(event));
+  console.error('Event dump  : ', JSON.stringify(event));
   console.error('Context dump: ', JSON.stringify(context));
 }

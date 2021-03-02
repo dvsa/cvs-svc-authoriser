@@ -1,5 +1,6 @@
 import {Action, Effect, HttpVerb} from "../models/IAM";
 import {Statement} from "aws-lambda";
+import {arnToString} from "./resource-arn";
 
 // see https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
 export default class StatementBuilder {
@@ -111,20 +112,20 @@ export default class StatementBuilder {
    * @returns the Statement that has been built
    */
   public build(): Statement {
-    let resource = `arn:aws:execute-api:${this.regionId}:${this.accountId}:${this.apiId}/${this.stage}/${this.httpVerb}/`;
-
-    if (this.resource) {
-      resource += `${this.resource}/`;
-
-      if (this.childResource) {
-        resource += this.childResource;
-      }
-    }
+    const resourceArn = arnToString({
+      region: this.regionId,
+      accountId: this.accountId,
+      apiId: this.apiId,
+      stage: this.stage,
+      httpVerb: this.httpVerb,
+      resource: this.resource,
+      childResource: this.childResource
+    });
 
     return {
       Action: this.action as string,
       Effect: this.effect as string,
-      Resource: resource
+      Resource: resourceArn
     };
   }
 }
