@@ -4,7 +4,7 @@ import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authori
 import {checkSignature} from "../services/signature-check";
 import Role, {getValidRoles} from "../services/roles";
 import {getValidJwt} from "../services/tokens";
-import {configuration, AuthorizerConfig, getAssociatedResources} from "../services/configuration";
+import {AuthorizerConfig, configuration, getAssociatedResources} from "../services/configuration";
 import {availableHttpVerbs, isSafe} from "../services/http-verbs";
 
 /**
@@ -53,7 +53,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => {
   const associatedResources: string[] = getAssociatedResources(role, config);
 
-  const statements: Statement[] = [];
+  let statements: Statement[] = [];
 
   for (const associatedResource of associatedResources) {
     const parts = associatedResource.substring(1).split('/');
@@ -66,21 +66,23 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
     }
 
     if (role.access === 'read') {
-      for (const httpVerb of availableHttpVerbs()) {
-        if (isSafe(httpVerb)) {
-          statements.push(new StatementBuilder()
-            .setEffect('Allow')
-            .setHttpVerb(httpVerb)
-            .setResource(resource)
-            .setChildResource(childResource)
-            .build()
-          );
-        }
-      }
+      statements = statements.concat(readRoleToStatements(resource, childResource));
     } else {
+      statements.push(writeRoleToStatement(resource, childResource));
+    }
+  }
+
+  return statements;
+}
+
+const readRoleToStatements = (resource: string, childResource: string | null): Statement[] => {
+  const statements: Statement[] = [];
+
+  for (const httpVerb of availableHttpVerbs()) {
+    if (isSafe(httpVerb)) {
       statements.push(new StatementBuilder()
         .setEffect('Allow')
-        .setHttpVerb('*')
+        .setHttpVerb(httpVerb)
         .setResource(resource)
         .setChildResource(childResource)
         .build()
@@ -89,6 +91,15 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
   }
 
   return statements;
+}
+
+const writeRoleToStatement = (resource: string, childResource: string | null): Statement => {
+  return new StatementBuilder()
+    .setEffect('Allow')
+    .setHttpVerb('*')
+    .setResource(resource)
+    .setChildResource(childResource)
+    .build();
 }
 
 const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
