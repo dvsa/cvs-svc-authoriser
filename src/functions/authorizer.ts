@@ -12,7 +12,7 @@ import {availableHttpVerbs, isSafe} from "../services/http-verbs";
  * and to verify its integrity and validity.
  * @param event - AWS Lambda event object
  * @param context - AWS Lambda Context object
- * @returns - Promise<Policy | undefined>
+ * @returns - Promise<APIGatewayAuthorizerResult>
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   try {
