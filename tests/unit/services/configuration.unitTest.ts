@@ -37,7 +37,7 @@ describe("configuration()", () => {
     });
 
     it('should successfully return config', async (): Promise<void> => {
-      setUpSecret(fs.readFileSync('tests/resources/fakeConfig.yml', 'utf-8'));
+      setUpSecret(fs.readFileSync('tests/resources/config-test.yml', 'utf-8'));
       await expect(configuration()).resolves.toStrictEqual(mockConfig);
     });
 

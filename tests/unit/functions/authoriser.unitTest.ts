@@ -10,6 +10,7 @@ import {getValidJwt} from "../../../src/services/tokens";
 import {configuration} from "../../../src/services/configuration";
 import * as fs from "fs";
 import {safeLoad} from "js-yaml";
+import {availableHttpVerbs, isSafe} from "../../../src/services/http-verbs";
 
 const event: APIGatewayTokenAuthorizerEvent = {
   type: 'TOKEN',
@@ -17,9 +18,13 @@ const event: APIGatewayTokenAuthorizerEvent = {
   methodArn: 'arn:aws:execute-api:eu-west-1:*:*/*/*/*'
 };
 
-describe('authoriser() unit tests', () => {
+describe('authorizer() unit tests', () => {
 
   beforeEach(() => {
+    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync('tests/resources/config-test.yml', 'utf-8')));
+
+    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
+
     (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([{
       name: 'a-role',
       access: 'read'
@@ -28,13 +33,9 @@ describe('authoriser() unit tests', () => {
     (checkSignature as jest.Mock) = jest.fn().mockImplementation(() => {
       /* circumvent TSLint no-empty */
     });
-
-    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync('tests/resources/fakeConfig.yml', 'utf-8')));
   })
 
   it('should fail on non-2xx HTTP status', async () => {
-    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
-
     (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(
       new StatusCodeError(418, 'I\'m a teapot', { url: 'http://example.org' }, {} as IncomingMessage)
     );
@@ -43,8 +44,6 @@ describe('authoriser() unit tests', () => {
   });
 
   it('should fail on JWT signature check error', async () => {
-    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
-
     (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(
       new Error('test-signature-error')
     );
@@ -52,14 +51,38 @@ describe('authoriser() unit tests', () => {
     await expectUnauthorised(event);
   });
 
-  it('should pass on valid JWT', async () => {
-    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
+  it('should return valid read-only statements on valid JWT', async () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    for (const statement of returnValue.policyDocument.Statement) {
-      expect(statement.Effect).toEqual('Allow');
+
+    for (const httpVerb of availableHttpVerbs()) {
+      if (isSafe(httpVerb)) {
+        expect(returnValue.policyDocument.Statement).toContainEqual({
+          Effect: 'Allow',
+          Action: 'execute-api:Invoke',
+          Resource: `arn:aws:execute-api:eu-west-1:*:*/*/${httpVerb}/a-resource/with-child`
+        });
+      }
     }
+  });
+
+  it('should return valid write statements on valid JWT', async () => {
+    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([{
+      name: 'a-role',
+      access: 'write'
+    }]);
+
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+
+    expect(returnValue.policyDocument.Statement.length).toEqual(1);
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: 'Allow',
+      Action: 'execute-api:Invoke',
+      Resource: 'arn:aws:execute-api:eu-west-1:*:*/*/*/a-resource/with-child'
+    });
   });
 });
 

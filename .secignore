@@ -1,2 +1,3 @@
 src/services/secrets.ts
 tests/unit/secrets.unitTest.ts
+tests/unit/services/secrets.unitTest.ts
