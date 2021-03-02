@@ -1,8 +1,11 @@
-import Role from "../models/Role";
-
 export type Access = 'read' | 'write'
 
-const backwardsCompatibleRoles = [
+export default interface Role {
+  name: string,
+  access: Access
+}
+
+const backwardsCompatibleRoleNames = [
   'CVSFullAccess',
   'CVSPsvTester',
   'CVSHgvTester',
@@ -22,7 +25,7 @@ export const getValidRoles = (token: any): Role[] => {
 
   for (const role of rolesOnToken) {
     // old role - definitely valid (for now)
-    if (backwardsCompatibleRoles.includes(role)) {
+    if (backwardsCompatibleRoleNames.includes(role)) {
       validRoles.push(newRole(role, 'write'));
     }
 
