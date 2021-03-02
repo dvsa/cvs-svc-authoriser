@@ -2,7 +2,6 @@ import {APIGatewayTokenAuthorizerEvent, Context} from "aws-lambda";
 import {StatusCodeError} from "request-promise/errors";
 import {authorizer} from "../../src/functions/authorizer";
 import {IncomingMessage} from "http";
-import AuthorizationError from "../../src/models/exceptions/AuthorizationError";
 import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
 import {checkSignature} from "../../src/services/signature-check";
 import {getValidRoles} from "../../src/services/roles";
@@ -43,11 +42,11 @@ describe('authoriser() unit tests', () => {
     await expectUnauthorised(event);
   });
 
-  it('should fail on JWT authorization error', async () => {
+  it('should fail on JWT signature check error', async () => {
     (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
 
     (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(
-      new AuthorizationError('test-authorization-error')
+      new Error('test-signature-error')
     );
 
     await expectUnauthorised(event);

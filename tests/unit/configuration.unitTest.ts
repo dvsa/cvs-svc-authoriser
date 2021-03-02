@@ -1,7 +1,6 @@
 import {safeDump} from "js-yaml";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
 import {configuration, AuthorizerConfig} from "../../src/services/configuration";
-import {AZURE_CONFIGURATION_NOT_VALID} from "../../src/models/exceptions/errors";
 import * as fs from "fs";
 
 describe("configuration()", () => {
@@ -56,7 +55,7 @@ describe("configuration()", () => {
 
     it('should fail if configuration object is null', async (): Promise<void> => {
       setUpSecret('');
-      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
+      await expect(configuration()).rejects.toThrowError('configuration is null or blank');
     });
 
     it('should fail if roleToResources is null', async (): Promise<void> => {
@@ -65,7 +64,7 @@ describe("configuration()", () => {
         roleToResources: null
       };
       setUpSecret(safeDump(config));
-      await expect(configuration()).rejects.toThrowError(AZURE_CONFIGURATION_NOT_VALID);
+      await expect(configuration()).rejects.toThrowError('missing required field');
     });
   });
 

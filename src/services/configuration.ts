@@ -1,6 +1,5 @@
 import {safeLoad} from "js-yaml";
 import {getSecret} from "./secrets";
-import {AZURE_CONFIGURATION_NOT_VALID} from "../models/exceptions/errors";
 import Role from "./roles";
 
 export interface AuthorizerConfig {
@@ -35,17 +34,21 @@ export const getAssociatedResources = (role: Role, config: AuthorizerConfig): st
 }
 
 const validate = (config: AuthorizerConfig): AuthorizerConfig => {
-  if (!config || !config.roleToResources) {
-    throw new Error(AZURE_CONFIGURATION_NOT_VALID);
+  if (!config) {
+    throw new Error('configuration is null or blank');
+  }
+
+  if (!config.roleToResources) {
+    throw new Error('configuration is missing required field \'roleToResources\'');
   }
 
   for (const resourceMapping of config.roleToResources) {
     if (!resourceMapping.roleName) {
-      throw new Error('resource mapping missing required field \'roleName\'');
+      throw new Error('resource mapping is missing required field \'roleName\'');
     }
 
     if (!resourceMapping.associatedResources) {
-      throw new Error(`role \'${resourceMapping.roleName}\' missing required field \'associatedResources\'`);
+      throw new Error(`role \'${resourceMapping.roleName}\' is missing required field \'associatedResources\'`);
     }
 
     if (resourceMapping.associatedResources.length === 0) {
