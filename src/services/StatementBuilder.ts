@@ -13,9 +13,9 @@ export default class StatementBuilder {
 
   // Resource fields
   private regionId: string = process.env.AWS_REGION || 'eu-west-1';
-  private accountId: string = '*';
-  private apiId: string = '*';
-  private stage: string = '*';
+  private accountId: string = process.env.AWS_ACCOUNT_ID || '*';
+  private apiId: string = process.env.AWS_APIG_ID || '*';
+  private stage: string = process.env.AWS_APIG_STAGE || '*';
   private httpVerb: HttpVerb = '*';
   private resource: string | null = null;
   private childResource: string | null = null;
