@@ -11,6 +11,7 @@ See the [Lambda Authorizer Confluence page][confluence].
 * Configuration is in YML format.
 * It's stored under AWS Secrets Manager, under path `<environment>/auth/config.yml`.
 * A (fake) example can be found [here][fake-config].
+
 ## Prerequisites
 ### Node JS
 Check you have Node and NPM in your terminal:
