@@ -3,6 +3,8 @@ import * as JWT from "jsonwebtoken";
 export const getValidJwt = (authorizationToken: string): any => {
   checkFormat(authorizationToken);
 
+  authorizationToken = authorizationToken.substring(7); // remove 'Bearer '
+
   const decoded = JWT.decode(authorizationToken, {complete: true});
 
   if (!decoded) {
