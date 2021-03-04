@@ -1,8 +1,6 @@
-import {AuthorizerConfig, configuration} from "../../../src/services/configuration";
+import {AuthorizerConfig, configuration, validate} from "../../../src/services/configuration";
 
 describe("configuration()", () => {
-  const OLD_ENV = process.env;
-
   const mockConfig: AuthorizerConfig = {
     roleToResources: [
       {
@@ -14,27 +12,21 @@ describe("configuration()", () => {
     ]
   };
 
-  beforeEach(() => {
-    jest.resetModules();
-    process.env = { ...OLD_ENV }; // (clone)
+  it('should successfully return any default configuration', (): void => {
+    expect(configuration()).resolves.toBeDefined();
   });
 
-  afterAll(() => {
-    process.env = OLD_ENV;
+  it('should successfully validate configuration if it\'s valid', (): void => {
+    expect(validate(mockConfig)).toEqual(mockConfig);
   });
 
-  it('should successfully return configuration if it\'s valid', async (): Promise<void> => {
-    process.env.CONFIG_FILE_PATH = 'tests/resources/config-test.yml';
-    await expect(configuration()).resolves.toStrictEqual(mockConfig);
+  it('should fail if configuration object is null', (): void => {
+    // @ts-ignore
+    expect((): void => validate(null)).toThrowError('configuration is null or blank');
   });
 
-  it('should fail if configuration object is null', async (): Promise<void> => {
-    process.env.CONFIG_FILE_PATH = 'tests/resources/config-blank.yml';
-    await expect(configuration()).rejects.toThrowError('configuration is null or blank');
-  });
-
-  it('should fail if configuration.roleToResources is null', async (): Promise<void> => {
-    process.env.CONFIG_FILE_PATH = 'tests/resources/config-no-roles.yml';
-    await expect(configuration()).rejects.toThrowError('missing required field');
+  it('should fail if configuration.roleToResources is null', (): void => {
+    // @ts-ignore
+    expect((): void => validate({})).toThrowError('missing required field');
   });
 });

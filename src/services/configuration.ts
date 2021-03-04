@@ -1,8 +1,41 @@
-import {safeLoad} from "js-yaml";
 import Role from "./roles";
-import * as fs from "fs";
-import {getEnvVar} from "./env-utils";
 
+const CONFIGURATION: AuthorizerConfig = {
+  roleToResources: [
+    {
+      roleName: 'CVSFullAccess',
+      associatedResources: [ '/*' ]
+    },
+    {
+      roleName: 'CVSPsvTester',
+      associatedResources: [ '/*' ]
+    },
+    {
+      roleName: 'CVSHgvTester',
+      associatedResources: [ '/*' ]
+    },
+    {
+      roleName: 'CVSAdrTester',
+      associatedResources: [ '/*' ]
+    },
+    {
+      roleName: 'CVSTirTester',
+      associatedResources: [ '/*' ]
+    },
+    {
+      roleName: 'VTMAdmin',
+      associatedResources: [ '/*' ]
+    },
+    {
+      roleName: 'Certs',
+      associatedResources: [ '/*' ]
+    },
+    {
+      roleName: 'VehicleData',
+      associatedResources: [ '/*' ]
+    }
+  ]
+}
 
 export interface AuthorizerConfig {
   roleToResources: ResourceMapping[]
@@ -14,18 +47,7 @@ export interface ResourceMapping {
 }
 
 export const configuration = async (): Promise<AuthorizerConfig> => {
-  let configPath: string = getEnvVar('CONFIG_FILE_PATH', 'src/resources/config.yml');
-
-  // see https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
-  if (process.env.LAMBDA_TASK_ROOT) {
-    configPath = `${process.env.LAMBDA_TASK_ROOT}/${configPath}`;
-  }
-
-  const configYml: string = fs.readFileSync(configPath, 'utf-8');
-
-  const config = safeLoad(configYml) as AuthorizerConfig;
-
-  return validate(config);
+  return validate(CONFIGURATION);
 }
 
 export const getAssociatedResources = (role: Role, config: AuthorizerConfig): string[] => {
@@ -38,7 +60,8 @@ export const getAssociatedResources = (role: Role, config: AuthorizerConfig): st
   return [];
 }
 
-const validate = (config: AuthorizerConfig): AuthorizerConfig => {
+// exported for testability :)
+export const validate = (config: AuthorizerConfig): AuthorizerConfig => {
   if (!config) {
     throw new Error('configuration is null or blank');
   }
