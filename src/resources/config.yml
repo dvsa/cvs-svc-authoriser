@@ -1,0 +1,25 @@
+roleToResources:
+  - roleName: 'CVSFullAccess'
+    associatedResources:
+      - '/*'
+  - roleName: 'CVSPsvTester'
+    associatedResources:
+      - '/*'
+  - roleName: 'CVSHgvTester'
+    associatedResources:
+      - '/*'
+  - roleName: 'CVSAdrTester'
+    associatedResources:
+      - '/*'
+  - roleName: 'CVSTirTester'
+    associatedResources:
+      - '/*'
+  - roleName: 'VTMAdmin'
+    associatedResources:
+      - '/*'
+  - roleName: 'Certs'
+    associatedResources:
+      - '/*'
+  - roleName: 'VehicleData'
+    associatedResources:
+      - '/*'

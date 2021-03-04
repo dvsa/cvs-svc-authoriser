@@ -1,6 +1,8 @@
 import {safeLoad} from "js-yaml";
-import {getSecret} from "./secrets";
 import Role from "./roles";
+import * as fs from "fs";
+import {getEnvVar} from "./env-utils";
+
 
 export interface AuthorizerConfig {
   roleToResources: ResourceMapping[]
@@ -12,13 +14,11 @@ export interface ResourceMapping {
 }
 
 export const configuration = async (): Promise<AuthorizerConfig> => {
-  if (!process.env.SECRET_NAME) {
-    throw new Error("SECRET_NAME environment variable not set!");
-  }
+  const configPath: string = getEnvVar('CONFIG_FILE_PATH', 'src/resources/config.yml');
 
-  const secretValue = await getSecret(process.env.SECRET_NAME as string);
+  const configYml: string = fs.readFileSync(configPath, 'utf-8');
 
-  const config = safeLoad(secretValue as string) as AuthorizerConfig;
+  const config = safeLoad(configYml) as AuthorizerConfig;
 
   return validate(config);
 }

@@ -1,7 +1,4 @@
-import {safeDump} from "js-yaml";
-import SecretsManager from "aws-sdk/clients/secretsmanager";
-import {configuration, AuthorizerConfig} from "../../../src/services/configuration";
-import * as fs from "fs";
+import {AuthorizerConfig, configuration} from "../../../src/services/configuration";
 
 describe("configuration()", () => {
   const OLD_ENV = process.env;
@@ -17,62 +14,27 @@ describe("configuration()", () => {
     ]
   };
 
-  beforeAll((): void => {
+  beforeEach(() => {
     jest.resetModules();
     process.env = { ...OLD_ENV }; // (clone)
-    setUpSecret(safeDump(mockConfig))
   });
 
   afterAll(() => {
     process.env = OLD_ENV;
   });
 
-  it('should fail if env.SECRET_NAME is not set', async (): Promise<void> => {
-    await expect(configuration()).rejects.toThrowError('SECRET_NAME environment variable not set!');
+  it('should successfully return configuration if it\'s valid', async (): Promise<void> => {
+    process.env.CONFIG_FILE_PATH = 'tests/resources/config-test.yml';
+    await expect(configuration()).resolves.toStrictEqual(mockConfig);
   });
 
-  context('when env.SECRET_NAME is set', () => {
-    beforeEach(() => {
-      process.env.SECRET_NAME = 'any';
-    });
-
-    it('should successfully return config', async (): Promise<void> => {
-      setUpSecret(fs.readFileSync('tests/resources/config-test.yml', 'utf-8'));
-      await expect(configuration()).resolves.toStrictEqual(mockConfig);
-    });
-
-    it('should fail if AWS throws error', async (): Promise<void> => {
-      SecretsManager.prototype.getSecretValue = jest.fn().mockImplementationOnce(
-        () => ({
-          promise: () => {
-            throw new Error('fake AWS error')
-          }
-        })
-      );
-
-      await expect(configuration()).rejects.toThrowError('fake AWS error');
-    });
-
-    it('should fail if configuration object is null', async (): Promise<void> => {
-      setUpSecret('');
-      await expect(configuration()).rejects.toThrowError('configuration is null or blank');
-    });
-
-    it('should fail if roleToResources is null', async (): Promise<void> => {
-      const config = {
-        ...mockConfig,
-        roleToResources: null
-      };
-      setUpSecret(safeDump(config));
-      await expect(configuration()).rejects.toThrowError('missing required field');
-    });
+  it('should fail if configuration object is null', async (): Promise<void> => {
+    process.env.CONFIG_FILE_PATH = 'tests/resources/config-blank.yml';
+    await expect(configuration()).rejects.toThrowError('configuration is null or blank');
   });
 
-  const setUpSecret = (secretString: string): void => {
-    SecretsManager.prototype.getSecretValue = jest.fn().mockImplementation(
-      () => ({
-        promise: () => ({SecretString: secretString})
-      })
-    );
-  }
+  it('should fail if configuration.roleToResources is null', async (): Promise<void> => {
+    process.env.CONFIG_FILE_PATH = 'tests/resources/config-no-roles.yml';
+    await expect(configuration()).rejects.toThrowError('missing required field');
+  });
 });
