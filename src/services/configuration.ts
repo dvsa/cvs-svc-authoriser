@@ -14,7 +14,12 @@ export interface ResourceMapping {
 }
 
 export const configuration = async (): Promise<AuthorizerConfig> => {
-  const configPath: string = getEnvVar('CONFIG_FILE_PATH', 'src/resources/config.yml');
+  let configPath: string = getEnvVar('CONFIG_FILE_PATH', 'src/resources/config.yml');
+
+  // see https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
+  if (process.env.LAMBDA_TASK_ROOT) {
+    configPath = `${process.env.LAMBDA_TASK_ROOT}/${configPath}`;
+  }
 
   const configYml: string = fs.readFileSync(configPath, 'utf-8');
 
