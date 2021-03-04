@@ -1,6 +1,7 @@
 import * as AWSXRay from "aws-xray-sdk";
 import {SecretsManager} from "aws-sdk";
 import {GetSecretValueRequest, GetSecretValueResponse} from "aws-sdk/clients/secretsmanager";
+import {getEnvVar} from "./env-utils";
 
 let secretsManager: SecretsManager | null = null;
 
@@ -21,7 +22,7 @@ export const getSecret = async (secretId: string): Promise<string> => {
 
 const getSecretsManager = (): SecretsManager => {
   if (!secretsManager) {
-    secretsManager = AWSXRay.captureAWSClient(new SecretsManager({region: process.env.AWS_REGION || "eu-west-1"}))
+    secretsManager = AWSXRay.captureAWSClient(new SecretsManager({region: getEnvVar('AWS_REGION', 'eu-west-1')}))
   }
   return secretsManager;
 }

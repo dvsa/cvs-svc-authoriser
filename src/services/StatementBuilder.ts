@@ -1,6 +1,7 @@
 import {HttpVerb} from "./http-verbs";
 import {Statement} from "aws-lambda";
 import {arnToString} from "./resource-arn";
+import {getEnvVar} from "./env-utils";
 
 export type Effect = 'Allow' | 'Deny';
 export type Action = "execute-api:Invoke" | "execute-api:api:InvalidateCache" | "execute-api:*";
@@ -12,10 +13,10 @@ export default class StatementBuilder {
   private action: Action = 'execute-api:Invoke';
 
   // Resource fields
-  private regionId: string = process.env.AWS_REGION || 'eu-west-1';
-  private accountId: string = process.env.AWS_ACCOUNT_ID || '*';
-  private apiId: string = process.env.AWS_APIG_ID || '*';
-  private stage: string = process.env.AWS_APIG_STAGE || '*';
+  private regionId: string = getEnvVar('AWS_REGION', 'eu-west-1');
+  private accountId: string = getEnvVar('AWS_ACCOUNT_ID', '*');
+  private apiId: string = getEnvVar('AWS_APIG_ID', '*');
+  private stage: string = getEnvVar('AWS_APIG_STAGE', '*');
   private httpVerb: HttpVerb = '*';
   private resource: string | null = null;
   private childResource: string | null = null;
