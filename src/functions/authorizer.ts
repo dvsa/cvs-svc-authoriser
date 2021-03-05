@@ -23,15 +23,14 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     const validRoles: Role[] = getValidRoles(jwt);
 
-    console.info(`valid roles: ${validRoles.map(r => r.name + '.' + r.access)}`);
-
     if (validRoles.length === 0) {
-      console.error('no valid roles on token')
-      dumpArguments(event, context);
+      reportNoValidRoles(jwt, event, context);
       return unauthorisedPolicy();
     }
 
-    await checkSignature(event.authorizationToken.substring(7), jwt); // remove 'Bearer '
+    // by this point we know authorizationToken meets formatting requirements
+    // remove 'Bearer ' when verifying signature
+    await checkSignature(event.authorizationToken.substring(7), jwt);
 
     let statements: Statement[] = [];
 
@@ -40,16 +39,10 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
       statements = statements.concat(items);
     }
 
-    console.info(`JWT.payload.sub = ${jwt.payload.sub}`);
-
-    const retVal: APIGatewayAuthorizerResult = {
+    return {
       principalId: jwt.payload.sub,
       policyDocument: newPolicyDocument(statements)
     }
-
-    console.info('policy dump: ', JSON.stringify(retVal));
-
-    return retVal;
   } catch (error: any) {
     console.error(error.message);
     dumpArguments(event, context);
@@ -60,8 +53,6 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
 const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => {
   const associatedResources: string[] = getAssociatedResources(role, config);
-
-  console.info(`found ${associatedResources.length} associated resource(s) for role ${role.name + '.' + role.access}: ${associatedResources}`);
 
   let statements: Statement[] = [];
 
@@ -81,9 +72,6 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
       statements.push(writeRoleToStatement(resource, childResource));
     }
   }
-
-  console.info(`returning ${statements.length} statement.Resource(s) for role ${role.name + '.' + role.access}:`
-    + ` ${statements.map((s: any) => (s.Effect + ', ' + s.Action + ',' + s.Resource))}`);
 
   return statements;
 }
@@ -133,6 +121,16 @@ const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
     Version: '2012-10-17',
     Statement: statements
   }
+}
+
+const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
+  const roles = jwt.payload.roles;
+  if (roles && roles.length === 0) {
+    console.error('no valid roles on token (token has no roles at all)');
+  } else {
+    console.error(`no valid roles on token (${roles.length} invalid role(s): ${roles})`);
+  }
+  dumpArguments(event, context);
 }
 
 const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
