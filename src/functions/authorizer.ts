@@ -23,6 +23,8 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     const validRoles: Role[] = getValidRoles(jwt);
 
+    console.info(`valid roles: ${validRoles.map(r => r.name + '.' + r.access)}`);
+
     if (validRoles.length === 0) {
       console.error('no valid roles on token')
       dumpArguments(event, context);
@@ -38,6 +40,8 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
       statements = statements.concat(items);
     }
 
+    console.info(`JWT.payload.sub = ${jwt.payload.sub}`);
+
     return {
       principalId: jwt.payload.sub,
       policyDocument: newPolicyDocument(statements)
@@ -52,6 +56,8 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
 const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => {
   const associatedResources: string[] = getAssociatedResources(role, config);
+
+  console.info(`found ${associatedResources.length} associated resource(s) for role ${role.name + '.' + role.access}: ${associatedResources}`);
 
   let statements: Statement[] = [];
 
@@ -71,6 +77,8 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
       statements.push(writeRoleToStatement(resource, childResource));
     }
   }
+
+  console.info(`returning ${statements.length} statement.Resource(s) for role ${role.name + '.' + role.access}: ${statements.map((s: any) => s.Resource)}`);
 
   return statements;
 }

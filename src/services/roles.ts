@@ -27,6 +27,7 @@ export const getValidRoles = (token: any): Role[] => {
     // old role - definitely valid (for now)
     if (backwardsCompatibleRoleNames.includes(role)) {
       validRoles.push(newRole(role, 'write'));
+      continue;
     }
 
     // new role - check basic formatting

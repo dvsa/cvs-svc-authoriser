@@ -5,6 +5,11 @@ export const checkSignature = async (encodedToken: string, decodedToken: any): P
   // tid = tenant ID, kid = key ID
   const certificate = await getCertificateChain(decodedToken.payload.tid, decodedToken.header.kid);
 
+  console.info(
+    `checking signature: TID = ${decodedToken.payload.tid};`
+    + ` KID = ${decodedToken.header.kid};`
+    + ` CRT (last 5) = ${certificate.substring(certificate.length - 6)}`);
+
   JWT.verify(
     encodedToken,
     certificate,
