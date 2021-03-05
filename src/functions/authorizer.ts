@@ -19,9 +19,9 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     // fail-fast if config is missing or invalid
     const config: AuthorizerConfig = await configuration();
 
-    const jwt = getValidJwt(event.authorizationToken);
+    const jwt: any = getValidJwt(event.authorizationToken);
 
-    const validRoles = getValidRoles(jwt);
+    const validRoles: Role[] = getValidRoles(jwt);
 
     if (validRoles.length === 0) {
       console.error('no valid roles on token')
@@ -29,7 +29,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
       return unauthorisedPolicy();
     }
 
-    await checkSignature(jwt);
+    await checkSignature(event.authorizationToken.substring(7), jwt); // remove 'Bearer '
 
     let statements: Statement[] = [];
 
