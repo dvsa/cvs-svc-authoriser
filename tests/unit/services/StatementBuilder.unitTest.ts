@@ -8,7 +8,7 @@ describe('StatementBuilder', (): void => {
 
     expect(statement.Effect).toEqual('Deny');
     expect(statement.Action).toEqual('execute-api:Invoke');
-    expect(statement.Resource).toEqual('arn:aws:execute-api:eu-west-1:*:*/*/*/');
+    expect(statement.Resource).toEqual('arn:aws:execute-api:eu-west-1:*:*/*/*');
   });
 
   it('should correctly build Statement regardless of setter order', (): void => {
@@ -25,7 +25,7 @@ describe('StatementBuilder', (): void => {
 
     expect(statement.Effect).toEqual('Allow');
     expect(statement.Action).toEqual('execute-api:Invoke');
-    expect(statement.Resource).toEqual('arn:aws:execute-api:us-east-1:accountId:apiId/stage/GET/');
+    expect(statement.Resource).toEqual('arn:aws:execute-api:us-east-1:accountId:apiId/stage/GET');
   });
 
   it('should correctly append resource', (): void => {
@@ -33,7 +33,7 @@ describe('StatementBuilder', (): void => {
       .setResource('resource')
       .build();
 
-    expect(statement.Resource).toEqual('arn:aws:execute-api:eu-west-1:*:*/*/*/resource/');
+    expect(statement.Resource).toEqual('arn:aws:execute-api:eu-west-1:*:*/*/*/resource');
   });
 
   it('should correctly append child resource when resource is present', (): void => {
@@ -51,6 +51,6 @@ describe('StatementBuilder', (): void => {
       .setChildResource('childResource')
       .build();
 
-    expect(statement.Resource).toEqual('arn:aws:execute-api:eu-west-1:*:*/*/*/');
+    expect(statement.Resource).toEqual('arn:aws:execute-api:eu-west-1:*:*/*/*');
   });
 });

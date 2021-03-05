@@ -11,13 +11,13 @@ export interface ResourceArn {
 }
 
 export const arnToString = (input: ResourceArn): string => {
-  let toString = `arn:aws:execute-api:${input.region}:${input.accountId}:${input.apiId}/${input.stage}/${input.httpVerb}/`;
+  let toString = `arn:aws:execute-api:${input.region}:${input.accountId}:${input.apiId}/${input.stage}/${input.httpVerb}`;
 
   if (input.resource) {
-    toString += `${input.resource}/`;
+    toString += `/${input.resource}`;
 
     if (input.childResource) {
-      toString += input.childResource;
+      toString += `/${input.childResource}`;
     }
   }
 
