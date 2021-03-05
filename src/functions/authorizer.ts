@@ -42,10 +42,14 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     console.info(`JWT.payload.sub = ${jwt.payload.sub}`);
 
-    return {
+    const retVal: APIGatewayAuthorizerResult = {
       principalId: jwt.payload.sub,
       policyDocument: newPolicyDocument(statements)
     }
+
+    console.info('policy dump: ', JSON.stringify(retVal));
+
+    return retVal;
   } catch (error: any) {
     console.error(error.message);
     dumpArguments(event, context);
@@ -78,7 +82,8 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
     }
   }
 
-  console.info(`returning ${statements.length} statement.Resource(s) for role ${role.name + '.' + role.access}: ${statements.map((s: any) => s.Resource)}`);
+  console.info(`returning ${statements.length} statement.Resource(s) for role ${role.name + '.' + role.access}:`
+    + ` ${statements.map((s: any) => (s.Effect + ', ' + s.Action + ',' + s.Resource))}`);
 
   return statements;
 }

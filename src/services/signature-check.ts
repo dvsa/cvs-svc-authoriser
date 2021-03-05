@@ -8,7 +8,7 @@ export const checkSignature = async (encodedToken: string, decodedToken: any): P
   console.info(
     `checking signature: TID = ${decodedToken.payload.tid};`
     + ` KID = ${decodedToken.header.kid};`
-    + ` CRT (last 5) = ${certificate.substring(certificate.length - 6)}`);
+    + ` CRT (last 5) = ${certificate.substring(certificate.length - 31)}`);
 
   JWT.verify(
     encodedToken,
