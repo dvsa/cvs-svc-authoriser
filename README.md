@@ -20,12 +20,16 @@ node --version
 npm --version
 ```
 
-**We strongly recommend [`nvm`][nvm] to manage your Node installation.**
+**We strongly recommend [`nvm`][nvm] to manage your Node installations** ([nvm-windows][nvm-windows] on Windows).
 
 To install on Linux:
 ```shell script
 sudo apt install nodejs
 ```
+
+To install on MacOS, either:
+* Download from [official site][nodejs]
+* Use [Homebrew][homebrew]: `brew install node`
 
 To install on Windows, either:
 * Download from [official site][nodejs]
@@ -63,7 +67,9 @@ For debugging purposes, available choices are:
 
 [confluence]: https://wiki.dvsacloud.uk/display/HVT/Lambda+Authoriser
 [nvm]: https://github.com/nvm-sh/nvm
+[nvm-windows]: https://github.com/coreybutler/nvm-windows
 [nodejs]: https://nodejs.org
+[homebrew]: https://brew.sh
 [chocolatey]: https://chocolatey.org
 [git-bash]: https://git-scm.com/downloads
 [cvs-svc-auto]: https://github.com/dvsa/cvs-auto-svc
