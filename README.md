@@ -8,8 +8,8 @@ Custom authentication and authorisation mechanism for all CVS API Gateway calls.
 See the [Lambda Authorizer Confluence page][confluence].
 
 ## Configuration
-* Configuration is in YML format.
-* It's stored under AWS Secrets Manager, under path `<environment>/auth/config.yml`.
+* Configuration is a TS object of type `AuthorizerConfig`.
+* Both `AuthorizerConfig` and the configuration itself are in [configuration.ts][configuration-ts].
 * A (fake) example can be found [here][fake-config].
 
 ## Prerequisites
@@ -20,7 +20,7 @@ node --version
 npm --version
 ```
 
-**We strongly recommend [`nvm`][nvm] to manage your Node installations** ([nvm-windows][nvm-windows] on Windows).
+**We strongly recommend [`nvm`][nvm] to manage your Node installations** ([`nvm-windows`][nvm-windows] on Windows). The project's `.nvmrc` (root directory) contains the recommended Node version.
 
 To install on Linux:
 ```shell script
@@ -74,6 +74,7 @@ For debugging purposes, available choices are:
 [git-bash]: https://git-scm.com/downloads
 [cvs-svc-auto]: https://github.com/dvsa/cvs-auto-svc
 [authorizer-ts]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/src/functions/authorizer.ts
+[configuration-ts]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/src/services/configuration.ts
 [fake-config]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/tests/resources/config-test.yml
 [lambda-authorizer-input]: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-input.html
 [lambda-authorizer-output]: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
