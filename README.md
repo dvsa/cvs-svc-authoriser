@@ -40,6 +40,8 @@ To install on Windows, either:
 npm install
 ```
 
+Note the project's `.npmrc` intentionally specifies [`save-exact`][save-exact]. This means dependencies at runtime will be locked to the specific version present in `package.json`.
+
 ## Build
 ```shell script
 npm run build
@@ -72,6 +74,7 @@ For debugging purposes, available choices are:
 [homebrew]: https://brew.sh
 [chocolatey]: https://chocolatey.org
 [git-bash]: https://git-scm.com/downloads
+[save-exact]: https://docs.npmjs.com/cli/v6/using-npm/config#save-exact
 [cvs-svc-auto]: https://github.com/dvsa/cvs-auto-svc
 [authorizer-ts]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/src/functions/authorizer.ts
 [configuration-ts]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/src/services/configuration.ts
