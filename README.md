@@ -42,6 +42,26 @@ npm install
 
 Note the project's `.npmrc` intentionally specifies [`save-exact`][save-exact]. This means dependencies at runtime will be locked to the specific version present in `package.json`.
 
+## Environment variables
+This project does not have a `.env` file. Environment variables are not needed for local development, including for running tests. *If this changes in future, please update this documentation.*
+
+Policy documents (authorizer return values) use four environment variables:
+
+| Environment variable   | Default     |
+|------------------------|-------------|
+| `AWS_REGION `          | `eu-west-1` |
+| `AWS_ACCOUNT_ID`       | `*`         |
+| `AWS_APIG_ID`          | `*`         |
+| `AWS_APIG_STAGE`       | `*`         |
+
+Currently, **none of these are explicitly set by Terraform**, so the default values are important.
+
+In addition, all Terraform'd Lambda functions in DVSA share three environment variables:
+
+* `BRANCH`, currently set in `package.json` scripts. Doesn't make a difference when running locally.
+* `BUCKET`, unused.
+* `SECRET_NAME`, unused.
+
 ## Build
 ```shell script
 npm run build
