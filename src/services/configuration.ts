@@ -33,7 +33,11 @@ const CONFIGURATION: AuthorizerConfig = {
     {
       roleName: 'VehicleData',
       associatedResources: [ '/*' ]
-    }
+    },
+    {
+      roleName: 'DVLATrailers',
+      associatedResources: [ '/trailers/*' ],
+    },
   ]
 }
 
