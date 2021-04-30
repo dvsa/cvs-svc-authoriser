@@ -70,7 +70,7 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
       statements = statements.concat(readRoleToStatements(resource, childResource));
     } else {
       console.log('role',role);
-      console.log('resources', resource);
+      console.log('resources', statements);
       statements.push(writeRoleToStatement(resource, childResource));
     }
   }
