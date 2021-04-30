@@ -69,6 +69,8 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
     if (role.access === 'read') {
       statements = statements.concat(readRoleToStatements(resource, childResource));
     } else {
+      console.log('role',role);
+      console.log('resources', resource);
       statements.push(writeRoleToStatement(resource, childResource));
     }
   }
