@@ -28,11 +28,11 @@ const CONFIGURATION: AuthorizerConfig = {
     },
     {
       roleName: 'Certs',
-      associatedResources: [ '/document-retrieval/*' ]
+      associatedResources: [ '/*' ]
     },
     {
       roleName: 'VehicleData',
-      associatedResources: [ '/enquiry/*' ]
+      associatedResources: [ '/*' ]
     },
     {
       roleName: 'DVLATrailers',
