@@ -25,7 +25,7 @@
     "aws-sdk": "2.745.0",
     "aws-xray-sdk": "3.1.0",
     "axios": "0.21.1",
-    "js-yaml": "3.14.0",
+    "js-yaml": "3.14.1",
     "jsonwebtoken": "8.5.1",
     "nock": "13.0.8",
     "request": "2.88.2",
