@@ -72,6 +72,9 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
       statements.push(writeRoleToStatement(resource, childResource));
     }
   }
+  console.log('role: ', role);
+  console.log('resources: ', associatedResources);
+  console.log('statements: ', statements);
   return statements;
 }
 
