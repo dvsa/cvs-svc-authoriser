@@ -16,7 +16,6 @@ import {availableHttpVerbs, isSafe} from "../services/http-verbs";
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   try {
-    console.log('authoriser event', event);
     // fail-fast if config is missing or invalid
     const config: AuthorizerConfig = await configuration();
 
