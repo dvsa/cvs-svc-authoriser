@@ -1,11 +1,11 @@
-import {APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement} from "aws-lambda";
+import { APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement } from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
-import {APIGatewayAuthorizerResult} from "aws-lambda/trigger/api-gateway-authorizer";
-import {checkSignature} from "../services/signature-check";
-import Role, {getValidRoles} from "../services/roles";
-import {getValidJwt} from "../services/tokens";
-import {AuthorizerConfig, configuration, getAssociatedResources} from "../services/configuration";
-import {availableHttpVerbs, isSafe} from "../services/http-verbs";
+import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
+import { checkSignature } from "../services/signature-check";
+import Role, { getValidRoles } from "../services/roles";
+import { getValidJwt } from "../services/tokens";
+import { AuthorizerConfig, configuration, getAssociatedResources } from "../services/configuration";
+import { availableHttpVerbs, isSafe } from "../services/http-verbs";
 
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
@@ -41,8 +41,8 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     return {
       principalId: jwt.payload.sub,
-      policyDocument: newPolicyDocument(statements)
-    }
+      policyDocument: newPolicyDocument(statements),
+    };
   } catch (error: any) {
     console.error(error.message);
     dumpArguments(event, context);
@@ -57,82 +57,67 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
   let statements: Statement[] = [];
 
   for (const associatedResource of associatedResources) {
-    const parts = associatedResource.substring(1).split('/');
+    const parts = associatedResource.substring(1).split("/");
     const resource = parts[0];
 
     let childResource = null;
 
     if (parts.length > 1) {
-      childResource = parts.slice(1).join('/');
+      childResource = parts.slice(1).join("/");
     }
 
-    if (role.access === 'read') {
+    if (role.access === "read") {
       statements = statements.concat(readRoleToStatements(resource, childResource));
     } else {
       statements.push(writeRoleToStatement(resource, childResource));
     }
   }
   return statements;
-}
+};
 
 const readRoleToStatements = (resource: string, childResource: string | null): Statement[] => {
   const statements: Statement[] = [];
 
   for (const httpVerb of availableHttpVerbs()) {
     if (isSafe(httpVerb)) {
-      statements.push(new StatementBuilder()
-        .setEffect('Allow')
-        .setHttpVerb(httpVerb)
-        .setResource(resource)
-        .setChildResource(childResource)
-        .build()
-      );
+      statements.push(new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build());
     }
   }
 
   return statements;
-}
+};
 
 const writeRoleToStatement = (resource: string, childResource: string | null): Statement => {
-  return new StatementBuilder()
-    .setEffect('Allow')
-    .setHttpVerb('*')
-    .setResource(resource)
-    .setChildResource(childResource)
-    .build();
-}
+  return new StatementBuilder().setEffect("Allow").setHttpVerb("*").setResource(resource).setChildResource(childResource).build();
+};
 
 const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
-  const statements: Statement[] = [
-    new StatementBuilder()
-      .setEffect('Deny')
-      .build()
-  ];
+  const statements: Statement[] = [new StatementBuilder().setEffect("Deny").build()];
 
   return {
-    principalId: 'Unauthorised',
-    policyDocument: newPolicyDocument(statements)
-  }
-}
+    principalId: "Unauthorised",
+    policyDocument: newPolicyDocument(statements),
+  };
+};
 
 const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
   return {
-    Version: '2012-10-17',
-    Statement: statements
-  }
-}
+    Version: "2012-10-17",
+    Statement: statements,
+  };
+};
 
 const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
   const roles = jwt.payload.roles;
   if (roles && roles.length === 0) {
-    console.error('no valid roles on token (token has no roles at all)');
+    console.error("no valid roles on token (token has no roles at all)");
   } else {
     console.error(`no valid roles on token (${roles.length} invalid role(s): ${roles})`);
   }
   dumpArguments(event, context);
-}
+};
 
 const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
-  console.error('Event dump  : ', JSON.stringify(event));
-  console.error('Context dump: ', JSON.stringify(context));
-}
+  console.error("Event dump  : ", JSON.stringify(event));
+  console.error("Context dump: ", JSON.stringify(context));
+};

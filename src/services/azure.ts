@@ -10,7 +10,7 @@ export const getCertificateChain = async (tenantId: string, keyId: string): Prom
   }
 
   return certificateChain;
-}
+};
 
 const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
   const response = await axios.get(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
@@ -25,4 +25,4 @@ const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
   }
 
   return map;
-}
+};

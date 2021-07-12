@@ -3,46 +3,46 @@ import Role from "./roles";
 const CONFIGURATION: AuthorizerConfig = {
   roleToResources: [
     {
-      roleName: 'CVSFullAccess',
-      associatedResources: [ '/*' ]
+      roleName: "CVSFullAccess",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'CVSPsvTester',
-      associatedResources: [ '/*' ]
+      roleName: "CVSPsvTester",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'CVSHgvTester',
-      associatedResources: [ '/*' ]
+      roleName: "CVSHgvTester",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'CVSAdrTester',
-      associatedResources: [ '/*' ]
+      roleName: "CVSAdrTester",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'CVSTirTester',
-      associatedResources: [ '/*' ]
+      roleName: "CVSTirTester",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'VTMAdmin',
-      associatedResources: [ '/*' ]
+      roleName: "VTMAdmin",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'Certs',
-      associatedResources: [ '/*' ]
+      roleName: "Certs",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'VehicleData',
-      associatedResources: [ '/*' ]
+      roleName: "VehicleData",
+      associatedResources: ["/*"],
     },
     {
-      roleName: 'DVLATrailers',
-      associatedResources: [ '/*/trailers', '/*/trailers/*' ],
+      roleName: "DVLATrailers",
+      associatedResources: ["/*/trailers", "/*/trailers/*"],
     },
-  ]
-}
+  ],
+};
 
 export interface AuthorizerConfig {
-  roleToResources: ResourceMapping[]
+  roleToResources: ResourceMapping[];
 }
 
 export interface ResourceMapping {
@@ -52,7 +52,7 @@ export interface ResourceMapping {
 
 export const configuration = async (): Promise<AuthorizerConfig> => {
   return validate(CONFIGURATION);
-}
+};
 
 export const getAssociatedResources = (role: Role, config: AuthorizerConfig): string[] => {
   for (const resourceMapping of config.roleToResources) {
@@ -62,21 +62,21 @@ export const getAssociatedResources = (role: Role, config: AuthorizerConfig): st
   }
 
   return [];
-}
+};
 
 // exported for testability :)
 export const validate = (config: AuthorizerConfig): AuthorizerConfig => {
   if (!config) {
-    throw new Error('configuration is null or blank');
+    throw new Error("configuration is null or blank");
   }
 
   if (!config.roleToResources) {
-    throw new Error('configuration is missing required field \'roleToResources\'');
+    throw new Error("configuration is missing required field 'roleToResources'");
   }
 
   for (const resourceMapping of config.roleToResources) {
     if (!resourceMapping.roleName) {
-      throw new Error('resource mapping is missing required field \'roleName\'');
+      throw new Error("resource mapping is missing required field 'roleName'");
     }
 
     if (!resourceMapping.associatedResources) {
@@ -92,11 +92,11 @@ export const validate = (config: AuthorizerConfig): AuthorizerConfig => {
         throw new Error(`role '${resourceMapping.roleName}' contains null or blank associated resources`);
       }
 
-      if (!associatedResource.startsWith('/')) {
+      if (!associatedResource.startsWith("/")) {
         throw new Error(`role '${resourceMapping.roleName}', resource '${associatedResource}' does not start with '/'`);
       }
     }
   }
 
   return config;
-}
+};

@@ -1,23 +1,22 @@
-import {HttpVerb} from "./http-verbs";
-import {Statement} from "aws-lambda";
-import {arnToString} from "./resource-arn";
-import {getEnvVar} from "./env-utils";
+import { HttpVerb } from "./http-verbs";
+import { Statement } from "aws-lambda";
+import { arnToString } from "./resource-arn";
+import { getEnvVar } from "./env-utils";
 
-export type Effect = 'Allow' | 'Deny';
+export type Effect = "Allow" | "Deny";
 export type Action = "execute-api:Invoke" | "execute-api:api:InvalidateCache" | "execute-api:*";
 
 // see https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
 export default class StatementBuilder {
-
-  private effect: Effect = 'Deny';
-  private action: Action = 'execute-api:Invoke';
+  private effect: Effect = "Deny";
+  private action: Action = "execute-api:Invoke";
 
   // Resource fields
-  private regionId: string = getEnvVar('AWS_REGION', 'eu-west-1');
-  private accountId: string = getEnvVar('AWS_ACCOUNT_ID', '*');
-  private apiId: string = getEnvVar('AWS_APIG_ID', '*');
-  private stage: string = getEnvVar('AWS_APIG_STAGE', '*');
-  private httpVerb: HttpVerb = '*';
+  private regionId: string = getEnvVar("AWS_REGION", "eu-west-1");
+  private accountId: string = getEnvVar("AWS_ACCOUNT_ID", "*");
+  private apiId: string = getEnvVar("AWS_APIG_ID", "*");
+  private stage: string = getEnvVar("AWS_APIG_STAGE", "*");
+  private httpVerb: HttpVerb = "*";
   private resource: string | null = null;
   private childResource: string | null = null;
 
@@ -123,13 +122,13 @@ export default class StatementBuilder {
       stage: this.stage,
       httpVerb: this.httpVerb,
       resource: this.resource,
-      childResource: this.childResource
+      childResource: this.childResource,
     });
 
     return {
       Action: this.action as string,
       Effect: this.effect as string,
-      Resource: resourceArn
+      Resource: resourceArn,
     };
   }
 }

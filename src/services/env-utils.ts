@@ -6,4 +6,4 @@ export const getEnvVar = (envVar: string, defaultValue: string) => {
   }
 
   return value;
-}
+};

@@ -1,0 +1,7 @@
+.build
+.github
+.reports
+.nyc_output
+build
+coverage
+node_modules
