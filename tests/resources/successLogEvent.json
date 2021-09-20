@@ -1,0 +1,9 @@
+{
+  "requestUrl": "https://testurl.com",
+  "timeOfRequest": "2021-09-29T10:33:41Z",
+  "email": "testuser@test.com",
+  "token": "testToken",
+  "tokenExpiry": "2021-09-29T11:33:41Z",
+  "roles": [],
+  "message": ""
+}

@@ -3,7 +3,6 @@ import Role, { getValidRoles } from "../../../src/services/roles";
 describe("getValidRoles()", () => {
   it("should return list of valid roles if there are any", () => {
     const roles: Role[] = getValidRoles(tokenWithRoles(["name1.read", "name2.WRITE"]));
-
     expect(roles.length).toEqual(2);
 
     expect(roles).toContainEqual({

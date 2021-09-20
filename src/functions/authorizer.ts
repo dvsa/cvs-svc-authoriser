@@ -6,6 +6,13 @@ import Role, { getValidRoles } from "../services/roles";
 import { getValidJwt } from "../services/tokens";
 import { AuthorizerConfig, configuration, getAssociatedResources } from "../services/configuration";
 import { availableHttpVerbs, isSafe } from "../services/http-verbs";
+import { JWT_MESSAGE } from "../models/enums";
+import { ILogEvent } from "../models/ILogEvent";
+import { ILogError } from "../models/ILogError";
+import { writeLogMessage } from "../common/Logger";
+
+export let logError: ILogError = {};
+export let logEvent: ILogEvent = {};
 
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
@@ -16,6 +23,7 @@ import { availableHttpVerbs, isSafe } from "../services/http-verbs";
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   try {
+    initialiseLogEvent(event);
     // fail-fast if config is missing or invalid
     const config: AuthorizerConfig = await configuration();
 
@@ -23,11 +31,11 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     const validRoles: Role[] = getValidRoles(jwt);
 
-    if (validRoles.length === 0) {
+    if (!validRoles || validRoles.length === 0) {
       reportNoValidRoles(jwt, event, context);
+      writeLogMessage(logEvent);
       return unauthorisedPolicy();
     }
-
     // by this point we know authorizationToken meets formatting requirements
     // remove 'Bearer ' when verifying signature
     await checkSignature(event.authorizationToken.substring(7), jwt);
@@ -39,14 +47,14 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
       statements = statements.concat(items);
     }
 
+    writeLogMessage(logEvent);
     return {
       principalId: jwt.payload.sub,
       policyDocument: newPolicyDocument(statements),
     };
   } catch (error: any) {
-    console.error(error.message);
+    writeLogMessage(logEvent, error);
     dumpArguments(event, context);
-
     return unauthorisedPolicy();
   }
 };
@@ -110,9 +118,9 @@ const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
 const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
   const roles = jwt.payload.roles;
   if (roles && roles.length === 0) {
-    console.error("no valid roles on token (token has no roles at all)");
+    logEvent.message = JWT_MESSAGE.NO_ROLES;
   } else {
-    console.error(`no valid roles on token (${roles.length} invalid role(s): ${roles})`);
+    logEvent.message = JWT_MESSAGE.INVALID_ROLES;
   }
   dumpArguments(event, context);
 };
@@ -120,4 +128,15 @@ const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, con
 const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
   console.error("Event dump  : ", JSON.stringify(event));
   console.error("Context dump: ", JSON.stringify(context));
+};
+
+/**
+ * This method is being used in order to clear the ILogEvent, ILogError objects and populate the request url and the time of request
+ * @param event
+ */
+const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent) => {
+  logEvent = {};
+  logError = {};
+  logEvent.requestUrl = event.methodArn;
+  logEvent.timeOfRequest = new Date().toISOString();
 };

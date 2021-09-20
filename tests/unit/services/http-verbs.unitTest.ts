@@ -27,3 +27,14 @@ describe("isSafe()", () => {
     expect(isSafe("TRACE")).toBeFalsy();
   });
 });
+
+describe("Throw error", () => {
+  it("should throw an error", () => {
+    expect(() => {
+      toHttpVerb("TEST");
+    }).toThrowError(Error);
+    expect(() => {
+      toHttpVerb("TEST");
+    }).toThrow("not a recognized HTTP verb: 'TEST'");
+  });
+});

@@ -1,3 +1,5 @@
+import { logEvent } from "../functions/authorizer";
+
 export type Access = "read" | "write";
 
 export default interface Role {
@@ -11,10 +13,13 @@ export const getValidRoles = (token: any): Role[] => {
   const rolesOnToken = token.payload.roles;
 
   if (!rolesOnToken) {
+    logEvent.roles = [];
     return [];
   }
 
   const validRoles = [];
+
+  logEvent.roles = rolesOnToken;
 
   for (const role of rolesOnToken) {
     // old role - definitely valid (for now)
