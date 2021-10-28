@@ -48,7 +48,6 @@ describe("authorizer() unit tests", () => {
     await expectUnauthorised(event);
   });
 
-
   it("should return valid read-only statements on valid JWT", async () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
