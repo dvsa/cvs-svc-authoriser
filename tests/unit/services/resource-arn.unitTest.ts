@@ -40,8 +40,6 @@ describe("throw errors", () => {
     expect(() => {
       stringToArn("");
     }).toThrow("ARN is null or blank");
-    // expect(stringToArn("")).toThrowError(Error);
-    // expect(stringToArn("")).toThrow("ARN is null or blank");
   });
 
   it("should throw and error with Arn is null or blank", () => {
