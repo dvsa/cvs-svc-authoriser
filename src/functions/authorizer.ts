@@ -33,7 +33,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     if (!validRoles || validRoles.length === 0) {
       reportNoValidRoles(jwt, event, context);
-      writeLogMessage(logEvent);
+      writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
       return unauthorisedPolicy();
     }
     // by this point we know authorizationToken meets formatting requirements
