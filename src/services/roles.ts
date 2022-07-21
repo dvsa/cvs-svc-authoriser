@@ -1,6 +1,10 @@
 import { logEvent } from "../functions/authorizer";
 
-export type Access = "read" | "write";
+export type Access = "read" | "write" | "view";
+
+function isOfTypeAccess(access: any): access is Access {
+  return ["read", "write", "view"].includes(access);
+}
 
 export default interface Role {
   name: string;
@@ -41,7 +45,7 @@ export const getValidRoles = (token: any): Role[] => {
       continue;
     }
 
-    if (["read", "write"].includes(access.toLowerCase())) {
+    if (isOfTypeAccess(access.toLowerCase())) {
       validRoles.push(newRole(name, access.toLowerCase()));
     }
   }

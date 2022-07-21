@@ -84,6 +84,26 @@ describe("authorizer() unit tests", () => {
     });
   });
 
+  it("should return valid view statement on valid JWT", async () => {
+    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
+      {
+        name: "a-role",
+        access: "view",
+      },
+    ]);
+
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+
+    expect(returnValue.policyDocument.Statement.length).toEqual(1);
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: "Allow",
+      Action: "execute-api:Invoke",
+      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/GET/a-resource/with-child",
+    });
+  });
+
   it("should return an unauthorised policy response", async () => {
     (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([]);
 

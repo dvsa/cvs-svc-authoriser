@@ -38,6 +38,10 @@ const CONFIGURATION: AuthorizerConfig = {
       roleName: "DVLATrailers",
       associatedResources: ["/*/trailers", "/*/trailers/*"],
     },
+    {
+      roleName: "TechRecord.View",
+      associatedResources: ["/vehicles/*"],
+    },
   ],
 };
 

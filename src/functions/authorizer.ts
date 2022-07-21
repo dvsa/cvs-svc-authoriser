@@ -5,14 +5,21 @@ import { checkSignature } from "../services/signature-check";
 import Role, { getValidRoles } from "../services/roles";
 import { getValidJwt } from "../services/tokens";
 import { AuthorizerConfig, configuration, getAssociatedResources } from "../services/configuration";
-import { availableHttpVerbs, isSafe } from "../services/http-verbs";
+import { HttpVerb } from "../services/http-verbs";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
 import { ILogError } from "../models/ILogError";
+import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
 import { writeLogMessage } from "../common/Logger";
 
 export let logError: ILogError = {};
 export let logEvent: ILogEvent = {};
+
+const accessToHttpVerbs: AccessHttpVerbMap = {
+  read: ["GET", "HEAD"],
+  write: ["*"],
+  view: ["GET"],
+};
 
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
@@ -68,35 +75,21 @@ const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => 
     const parts = associatedResource.substring(1).split("/");
     const resource = parts[0];
 
-    let childResource = null;
+    let childResource: string | null = null;
 
     if (parts.length > 1) {
       childResource = parts.slice(1).join("/");
     }
 
-    if (role.access === "read") {
-      statements = statements.concat(readRoleToStatements(resource, childResource));
-    } else {
-      statements.push(writeRoleToStatement(resource, childResource));
+    if (Object.keys(accessToHttpVerbs).includes(role.access)) {
+      statements = [...statements, ...accessToHttpVerbs[role.access].map((httpVerb) => roleToStatement(resource, childResource, httpVerb))];
     }
   }
   return statements;
 };
 
-const readRoleToStatements = (resource: string, childResource: string | null): Statement[] => {
-  const statements: Statement[] = [];
-
-  for (const httpVerb of availableHttpVerbs()) {
-    if (isSafe(httpVerb)) {
-      statements.push(new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build());
-    }
-  }
-
-  return statements;
-};
-
-const writeRoleToStatement = (resource: string, childResource: string | null): Statement => {
-  return new StatementBuilder().setEffect("Allow").setHttpVerb("*").setResource(resource).setChildResource(childResource).build();
+const roleToStatement = (resource: string, childResource: string | null, httpVerb: HttpVerb): Statement => {
+  return new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build();
 };
 
 const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
