@@ -16,7 +16,7 @@
     "test-i": "echo \"No Current Int Tests\"",
     "prepush": "npm run test && npm run build && npm run test-i",
     "predeploy": "npm install && npm run prepush",
-    "security-checks": "git secrets --scan && git log -p | scanrepo",
+    "security-checks": "git secrets --scan",
     "lint": "tslint src/**/*.ts tests/**/*.ts",
     "format": "prettier --write .",
     "sonar-scanner": "sonar-scanner",
