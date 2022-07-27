@@ -23,7 +23,7 @@ describe("getValidRoles()", () => {
       name: "TechRecord",
       access: "view",
     });
-  })
+  });
 
   it("should return backwards-compatible roles with write access", () => {
     const roles: Role[] = getValidRoles(tokenWithRoles(["CVSFullAccess"]));

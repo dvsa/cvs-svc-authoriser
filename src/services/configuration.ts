@@ -63,9 +63,9 @@ export const getAssociatedResources = (role: Role, config: AuthorizerConfig): st
     if (resourceMapping.roleName === role.name) {
       return resourceMapping.associatedResources;
     }
-    if (role.name.includes(".")) {
-      const [object, action] = resourceMapping.roleName.split(".")
-      if (role.name === object && role.access === action) return resourceMapping.associatedResources;
+    if (resourceMapping.roleName.includes(".")) {
+      const [object, action] = resourceMapping.roleName.split(".");
+      if (role.name === object && role.access === action.toLowerCase()) return resourceMapping.associatedResources;
     }
   }
 
