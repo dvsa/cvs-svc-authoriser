@@ -85,9 +85,11 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should return valid view statement on valid JWT", async () => {
+    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-test-tech-record.yml", "utf-8")));
+
     (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
       {
-        name: "a-role",
+        name: "TechRecord",
         access: "view",
       },
     ]);
@@ -100,7 +102,7 @@ describe("authorizer() unit tests", () => {
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
-      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/GET/a-resource/with-child",
+      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/GET/vehicles/*",
     });
   });
 

@@ -15,6 +15,16 @@ describe("getValidRoles()", () => {
     });
   });
 
+  it("should return list of valid roles for TechRecord.View", () => {
+    const roles: Role[] = getValidRoles(tokenWithRoles(["TechRecord.View"]));
+    expect(roles.length).toEqual(1);
+
+    expect(roles).toContainEqual({
+      name: "TechRecord",
+      access: "view",
+    });
+  })
+
   it("should return backwards-compatible roles with write access", () => {
     const roles: Role[] = getValidRoles(tokenWithRoles(["CVSFullAccess"]));
 

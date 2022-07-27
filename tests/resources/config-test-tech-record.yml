@@ -1,0 +1,4 @@
+roleToResources:
+  - roleName: "TechRecord"
+    associatedResources:
+      - "/vehicles/*"
