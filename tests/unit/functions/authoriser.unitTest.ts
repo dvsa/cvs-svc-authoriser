@@ -10,7 +10,6 @@ import { getValidJwt } from "../../../src/services/tokens";
 import { configuration } from "../../../src/services/configuration";
 import * as fs from "fs";
 import { safeLoad } from "js-yaml";
-import { availableHttpVerbs, isSafe } from "../../../src/services/http-verbs";
 
 const event: APIGatewayTokenAuthorizerEvent = {
   type: "TOKEN",
@@ -52,16 +51,18 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+    expect(returnValue.policyDocument.Statement.length).toEqual(2)
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: "Allow",
+      Action: "execute-api:Invoke",
+      Resource: `arn:aws:execute-api:eu-west-1:*:*/*/GET/a-resource/with-child`,
+    });
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: "Allow",
+      Action: "execute-api:Invoke",
+      Resource: `arn:aws:execute-api:eu-west-1:*:*/*/HEAD/a-resource/with-child`,
+    });
 
-    for (const httpVerb of availableHttpVerbs()) {
-      if (isSafe(httpVerb)) {
-        expect(returnValue.policyDocument.Statement).toContainEqual({
-          Effect: "Allow",
-          Action: "execute-api:Invoke",
-          Resource: `arn:aws:execute-api:eu-west-1:*:*/*/${httpVerb}/a-resource/with-child`,
-        });
-      }
-    }
   });
 
   it("should return valid write statements on valid JWT", async () => {
