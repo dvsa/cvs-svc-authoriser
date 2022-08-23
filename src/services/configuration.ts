@@ -42,6 +42,10 @@ const CONFIGURATION: AuthorizerConfig = {
       roleName: "TechRecord.View",
       associatedResources: ["/vehicles/*"],
     },
+    {
+      roleName: "VTBooking.Post",
+      associatedResources: ["/vt-booking"]
+    }
   ],
 };
 

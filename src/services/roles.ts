@@ -1,9 +1,9 @@
 import { logEvent } from "../functions/authorizer";
 
-export type Access = "read" | "write" | "view";
+export type Access = "read" | "write" | "view" | "post";
 
 function isOfTypeAccess(access: any): access is Access {
-  return ["read", "write", "view"].includes(access);
+  return ["read", "write", "view", "post"].includes(access);
 }
 
 export default interface Role {

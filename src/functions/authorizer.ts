@@ -19,6 +19,7 @@ const accessToHttpVerbs: AccessHttpVerbMap = {
   read: ["GET", "HEAD"],
   write: ["*"],
   view: ["GET"],
+  post: ["POST"],
 };
 
 /**

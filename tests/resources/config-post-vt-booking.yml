@@ -1,0 +1,4 @@
+roleToResources:
+  - roleName: "VTBooking.Post"
+    associatedResources:
+      - "/vt-booking"

@@ -25,6 +25,16 @@ describe("getValidRoles()", () => {
     });
   });
 
+  it("should return list of valid roles for VTBooking.Post", () => {
+    const roles: Role[] = getValidRoles(tokenWithRoles(["VTBooking.Post"]))
+    expect(roles.length).toEqual(1);
+
+    expect(roles).toContainEqual({
+      name: "VTBooking",
+      access: "post"
+    })
+  })
+
   it("should return backwards-compatible roles with write access", () => {
     const roles: Role[] = getValidRoles(tokenWithRoles(["CVSFullAccess"]));
 
