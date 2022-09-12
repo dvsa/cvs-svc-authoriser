@@ -51,7 +51,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(2);
+    expect(returnValue.policyDocument.Statement.length).toEqual(2)
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
@@ -62,6 +62,7 @@ describe("authorizer() unit tests", () => {
       Action: "execute-api:Invoke",
       Resource: `arn:aws:execute-api:eu-west-1:*:*/*/HEAD/a-resource/with-child`,
     });
+
   });
 
   it("should return valid write statements on valid JWT", async () => {
@@ -85,7 +86,7 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should return valid view statement on valid JWT", async () => {
-    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-view-tech-record.yml", "utf-8")));
+    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-test-tech-record.yml", "utf-8")));
 
     (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
       {
@@ -105,28 +106,6 @@ describe("authorizer() unit tests", () => {
       Resource: "arn:aws:execute-api:eu-west-1:*:*/*/GET/vehicles/*",
     });
   });
-
-  it("should return valid post statement on valid JWT", async () => {
-    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-post-vt-booking.yml", "utf-8")));
-
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
-      {
-        name: "VTBooking",
-        access: "post",
-      },
-    ]);
-
-    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
-
-    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-
-    expect(returnValue.policyDocument.Statement.length).toEqual(1);
-    expect(returnValue.policyDocument.Statement).toContainEqual({
-      Effect: "Allow",
-      Action: "execute-api:Invoke",
-      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/POST/vt-booking",
-    });
-  })
 
   it("should return an unauthorised policy response", async () => {
     (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([]);
