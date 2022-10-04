@@ -4,7 +4,7 @@
   "description": "Lambda authoriser for validating a user's Azure AD JWT and generating an access policy.",
   "main": "handler.js",
   "engines": {
-    "node": "14.*"
+    "node": "16.*"
   },
   "scripts": {
     "build": "node_modules/typescript/bin/tsc --rootDir ./ --outDir build --sourceMap false && npm run build:copy && npm run build:install",

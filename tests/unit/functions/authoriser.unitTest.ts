@@ -4,7 +4,7 @@ import { authorizer } from "../../../src/functions/authorizer";
 import { IncomingMessage } from "http";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
 import { checkSignature } from "../../../src/services/signature-check";
-import { getValidRoles } from "../../../src/services/roles";
+import { getLegacyRoles } from "../../../src/services/roles";
 import jwtJson from "../../resources/jwt.json";
 import { getValidJwt } from "../../../src/services/tokens";
 import { configuration } from "../../../src/services/configuration";
@@ -23,7 +23,7 @@ describe("authorizer() unit tests", () => {
 
     (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
 
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([
       {
         name: "a-role",
         access: "read",
@@ -66,7 +66,7 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should return valid write statements on valid JWT", async () => {
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([
       {
         name: "a-role",
         access: "write",
@@ -88,7 +88,7 @@ describe("authorizer() unit tests", () => {
   it("should return valid view statement on valid JWT", async () => {
     (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-test-tech-record.yml", "utf-8")));
 
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([
       {
         name: "TechRecord",
         access: "view",
@@ -108,7 +108,7 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should return an unauthorised policy response", async () => {
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 

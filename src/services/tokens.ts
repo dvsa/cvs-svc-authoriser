@@ -1,18 +1,21 @@
 import * as JWT from "jsonwebtoken";
 import { JWT_MESSAGE } from "../models/enums";
-import { logEvent } from "../functions/authorizer";
+import { ILogEvent } from "../models/ILogEvent";
+import { checkSignature } from "./signature-check";
 
-export const getValidJwt = (authorizationToken: string): any => {
+export const getValidJwt = async (authorizationToken: string, logEvent:ILogEvent): Promise<any> => {
   checkFormat(authorizationToken);
 
   authorizationToken = authorizationToken.substring(7); // remove 'Bearer '
-  logEvent.token = authorizationToken;
 
   const decoded: any = JWT.decode(authorizationToken, { complete: true });
 
   if (!decoded) {
     throw new Error(JWT_MESSAGE.DECODE_FAILED);
   }
+
+  //Token should be ignored if it's not valid
+  await checkSignature(authorizationToken, decoded);
 
   let username;
 

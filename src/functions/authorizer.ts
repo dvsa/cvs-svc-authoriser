@@ -1,25 +1,15 @@
-import { APIGatewayTokenAuthorizerEvent, Context, PolicyDocument, Statement } from "aws-lambda";
+import { APIGatewayTokenAuthorizerEvent, Context, Statement } from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
-import { checkSignature } from "../services/signature-check";
-import Role, { getValidRoles } from "../services/roles";
+import { generatePolicy as generateLegacyPolicy} from "./legacyPolicyFactory";
+import { generatePolicy as generateRolePolicy} from "./rolePolicyFactory";
+import Role, { getLegacyRoles } from "../services/roles";
 import { getValidJwt } from "../services/tokens";
-import { AuthorizerConfig, configuration, getAssociatedResources } from "../services/configuration";
-import { HttpVerb } from "../services/http-verbs";
+import { AuthorizerConfig, configuration } from "../services/configuration";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
-import { ILogError } from "../models/ILogError";
-import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
 import { writeLogMessage } from "../common/Logger";
-
-export let logError: ILogError = {};
-export let logEvent: ILogEvent = {};
-
-const accessToHttpVerbs: AccessHttpVerbMap = {
-  read: ["GET", "HEAD"],
-  write: ["*"],
-  view: ["GET"],
-};
+import newPolicyDocument from "./newPolicyDocument";
 
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
@@ -29,67 +19,33 @@ const accessToHttpVerbs: AccessHttpVerbMap = {
  * @returns - Promise<APIGatewayAuthorizerResult>
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
+  const logEvent: ILogEvent = {};
   try {
     initialiseLogEvent(event);
-    // fail-fast if config is missing or invalid
     const config: AuthorizerConfig = await configuration();
+    const jwt: any = getValidJwt(event.authorizationToken, logEvent);
 
-    const jwt: any = getValidJwt(event.authorizationToken);
+    const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
-    const validRoles: Role[] = getValidRoles(jwt);
-
-    if (!validRoles || validRoles.length === 0) {
-      reportNoValidRoles(jwt, event, context);
-      writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
-      return unauthorisedPolicy();
-    }
-    // by this point we know authorizationToken meets formatting requirements
-    // remove 'Bearer ' when verifying signature
-    await checkSignature(event.authorizationToken.substring(7), jwt);
-
-    let statements: Statement[] = [];
-
-    for (const role of validRoles) {
-      const items = roleToStatements(role, config);
-      statements = statements.concat(items);
+    if (legacyRoles && legacyRoles.length > 0) {
+      return generateLegacyPolicy(jwt, legacyRoles, config)
     }
 
-    writeLogMessage(logEvent);
-    return {
-      principalId: jwt.payload.sub,
-      policyDocument: newPolicyDocument(statements),
-    };
+    const roleBasedPolicy = await generateRolePolicy(jwt, logEvent);
+
+    if(roleBasedPolicy)
+    {
+      return roleBasedPolicy;
+    }
+
+    reportNoValidRoles(jwt, event, context, logEvent);
+    writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
+    return unauthorisedPolicy();
   } catch (error: any) {
     writeLogMessage(logEvent, error);
     dumpArguments(event, context);
     return unauthorisedPolicy();
   }
-};
-
-const roleToStatements = (role: Role, config: AuthorizerConfig): Statement[] => {
-  const associatedResources: string[] = getAssociatedResources(role, config);
-
-  let statements: Statement[] = [];
-
-  for (const associatedResource of associatedResources) {
-    const parts = associatedResource.substring(1).split("/");
-    const resource = parts[0];
-
-    let childResource: string | null = null;
-
-    if (parts.length > 1) {
-      childResource = parts.slice(1).join("/");
-    }
-
-    if (Object.keys(accessToHttpVerbs).includes(role.access)) {
-      statements = [...statements, ...accessToHttpVerbs[role.access].map((httpVerb) => roleToStatement(resource, childResource, httpVerb))];
-    }
-  }
-  return statements;
-};
-
-const roleToStatement = (resource: string, childResource: string | null, httpVerb: HttpVerb): Statement => {
-  return new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build();
 };
 
 const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
@@ -101,14 +57,7 @@ const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
   };
 };
 
-const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
-  return {
-    Version: "2012-10-17",
-    Statement: statements,
-  };
-};
-
-const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
+const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context, logEvent:ILogEvent): void => {
   const roles = jwt.payload.roles;
   if (roles && roles.length === 0) {
     logEvent.message = JWT_MESSAGE.NO_ROLES;
@@ -127,9 +76,10 @@ const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context):
  * This method is being used in order to clear the ILogEvent, ILogError objects and populate the request url and the time of request
  * @param event
  */
-const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent) => {
-  logEvent = {};
-  logError = {};
-  logEvent.requestUrl = event.methodArn;
-  logEvent.timeOfRequest = new Date().toISOString();
+const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent):ILogEvent => {
+  return <ILogEvent>{
+    requestUrl: event.methodArn,
+    timeOfRequest: new Date().toISOString()
+  };
 };
+

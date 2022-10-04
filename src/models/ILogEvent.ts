@@ -6,7 +6,6 @@ export interface ILogEvent {
   timeOfRequest?: string;
   statusCode?: number;
   email?: string;
-  token?: string;
   tokenExpiry?: string;
   roles?: Role[];
   message?: string;

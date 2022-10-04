@@ -1,12 +1,13 @@
 import { ILogEvent } from "../models/ILogEvent";
 import { JWT_MESSAGE } from "../models/enums";
-import { logError } from "../functions/authorizer";
+import { ILogError } from "../models/ILogError";
 
 export const writeLogMessage = (log: ILogEvent, error?: any) => {
   if (!error) {
     log.statusCode = 200;
     console.log(log);
   } else {
+    const logError:ILogError = {};
     log.statusCode = 401;
     switch (error.name) {
       case "TokenExpiredError":
