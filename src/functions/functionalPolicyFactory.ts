@@ -22,8 +22,7 @@ const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
 export function generatePolicy(jwt: any, logEvent: ILogEvent): APIGatewayAuthorizerResult | PromiseLike<APIGatewayAuthorizerResult> | null {
   const statements: Statement[] = [];
 
-  if(statements.length === 0)
-  {
+  if (statements.length === 0) {
     return null;
   }
 

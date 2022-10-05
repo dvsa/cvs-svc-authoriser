@@ -14,30 +14,28 @@ const accessToHttpVerbs: AccessHttpVerbMap = {
 };
 
 const Configuration: AuthorizerConfig = {
-    "CVSFullAccess":["/*"],
-    "CVSPsvTester":["/*"],
-    "CVSHgvTester":["/*"],
-    "CVSAdrTester":["/*"],
-    "CVSTirTester":["/*"],
-    "VTMAdmin":["/*"],
-    "Certs":["/*"],
-    "VehicleData":["/*"],
-    "DVLATrailers":["/*/trailers", "/*/trailers/*"],
-    "TechRecord.View":["/vehicles/*"]
+  CVSFullAccess: ["/*"],
+  CVSPsvTester: ["/*"],
+  CVSHgvTester: ["/*"],
+  CVSAdrTester: ["/*"],
+  CVSTirTester: ["/*"],
+  VTMAdmin: ["/*"],
+  Certs: ["/*"],
+  VehicleData: ["/*"],
+  DVLATrailers: ["/*/trailers", "/*/trailers/*"],
+  "TechRecord.View": ["/vehicles/*"],
 };
 
 interface AuthorizerConfig {
-  [key:string]:NonEmptyArray<string>
+  [key: string]: NonEmptyArray<string>;
 }
 
 const getAssociatedResources = (role: Role): string[] => {
-  if(Configuration[role.name] !== undefined)
-  {
+  if (Configuration[role.name] !== undefined) {
     return Configuration[role.name];
   }
 
-  if(role.name === "TechRecord" && role.access === "view")
-  {
+  if (role.name === "TechRecord" && role.access === "view") {
     return Configuration["TechRecord.View"];
   }
 
