@@ -7,7 +7,6 @@ import { checkSignature } from "../../../src/services/signature-check";
 import { getLegacyRoles } from "../../../src/services/roles";
 import jwtJson from "../../resources/jwt.json";
 import { getValidJwt } from "../../../src/services/tokens";
-import { configuration } from "../../../src/services/configuration";
 import * as fs from "fs";
 import { safeLoad } from "js-yaml";
 
@@ -19,8 +18,6 @@ const event: APIGatewayTokenAuthorizerEvent = {
 
 describe("authorizer() unit tests", () => {
   beforeEach(() => {
-    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-test.yml", "utf-8")));
-
     (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
 
     (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([
@@ -86,8 +83,6 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should return valid view statement on valid JWT", async () => {
-    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-test-tech-record.yml", "utf-8")));
-
     (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([
       {
         name: "TechRecord",

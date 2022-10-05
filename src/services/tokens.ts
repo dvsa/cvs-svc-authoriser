@@ -14,7 +14,7 @@ export const getValidJwt = async (authorizationToken: string, logEvent:ILogEvent
     throw new Error(JWT_MESSAGE.DECODE_FAILED);
   }
 
-  //Token should be ignored if it's not valid
+  // Token should be ignored if it's not valid
   await checkSignature(authorizationToken, decoded);
 
   let username;

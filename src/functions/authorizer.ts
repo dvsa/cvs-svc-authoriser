@@ -5,7 +5,6 @@ import { generatePolicy as generateLegacyPolicy} from "./legacyPolicyFactory";
 import { generatePolicy as generateRolePolicy} from "./rolePolicyFactory";
 import Role, { getLegacyRoles } from "../services/roles";
 import { getValidJwt } from "../services/tokens";
-import { AuthorizerConfig, configuration } from "../services/configuration";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
 import { writeLogMessage } from "../common/Logger";
@@ -22,13 +21,12 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
   const logEvent: ILogEvent = {};
   try {
     initialiseLogEvent(event);
-    const config: AuthorizerConfig = await configuration();
     const jwt: any = getValidJwt(event.authorizationToken, logEvent);
 
     const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
     if (legacyRoles && legacyRoles.length > 0) {
-      return generateLegacyPolicy(jwt, legacyRoles, config)
+      return generateLegacyPolicy(jwt, legacyRoles)
     }
 
     const roleBasedPolicy = await generateRolePolicy(jwt, logEvent);
@@ -77,9 +75,9 @@ const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context):
  * @param event
  */
 const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent):ILogEvent => {
-  return <ILogEvent>{
+  return {
     requestUrl: event.methodArn,
     timeOfRequest: new Date().toISOString()
-  };
+  } as ILogEvent;
 };
 
