@@ -1,8 +1,8 @@
 import { APIGatewayTokenAuthorizerEvent, Context, Statement } from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
-import { generatePolicy as generateLegacyPolicy} from "./legacyPolicyFactory";
-import { generatePolicy as generateRolePolicy} from "./rolePolicyFactory";
+import { generatePolicy as generateLegacyPolicy } from "./legacyPolicyFactory";
+import { generatePolicy as generateRolePolicy } from "./rolePolicyFactory";
 import Role, { getLegacyRoles } from "../services/roles";
 import { getValidJwt } from "../services/tokens";
 import { JWT_MESSAGE } from "../models/enums";
@@ -26,13 +26,12 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
     if (legacyRoles && legacyRoles.length > 0) {
-      return generateLegacyPolicy(jwt, legacyRoles)
+      return generateLegacyPolicy(jwt, legacyRoles);
     }
 
     const roleBasedPolicy = await generateRolePolicy(jwt, logEvent);
 
-    if(roleBasedPolicy)
-    {
+    if (roleBasedPolicy) {
       return roleBasedPolicy;
     }
 
@@ -55,7 +54,7 @@ const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
   };
 };
 
-const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context, logEvent:ILogEvent): void => {
+const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context, logEvent: ILogEvent): void => {
   const roles = jwt.payload.roles;
   if (roles && roles.length === 0) {
     logEvent.message = JWT_MESSAGE.NO_ROLES;
@@ -74,10 +73,9 @@ const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context):
  * This method is being used in order to clear the ILogEvent, ILogError objects and populate the request url and the time of request
  * @param event
  */
-const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent):ILogEvent => {
+const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent): ILogEvent => {
   return {
     requestUrl: event.methodArn,
-    timeOfRequest: new Date().toISOString()
+    timeOfRequest: new Date().toISOString(),
   } as ILogEvent;
 };
-

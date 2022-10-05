@@ -3,7 +3,7 @@ import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
 import { checkSignature } from "./signature-check";
 
-export const getValidJwt = async (authorizationToken: string, logEvent:ILogEvent): Promise<any> => {
+export const getValidJwt = async (authorizationToken: string, logEvent: ILogEvent): Promise<any> => {
   checkFormat(authorizationToken);
 
   authorizationToken = authorizationToken.substring(7); // remove 'Bearer '

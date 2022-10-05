@@ -5,25 +5,25 @@ import { HttpVerb, toHttpVerb } from "../services/http-verbs";
 
 type NonEmptyArray<T> = [T, ...T[]];
 
-interface IApiAccess{
-  verb:HttpVerb,
-  path:string
+interface IApiAccess {
+  verb: HttpVerb;
+  path: string;
 }
 
-const roleConfig:{[key:string]:NonEmptyArray<IApiAccess>} = {
-  "createTechRecord":[
+const roleConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
+  createTechRecord: [
     {
-      verb:"POST",
-      path:"vehicles/*"
-    }
-  ]
+      verb: "POST",
+      path: "vehicles/*",
+    },
+  ],
+};
+
+export function generatePolicy(jwt: any, logEvent: ILogEvent): APIGatewayAuthorizerResult | PromiseLike<APIGatewayAuthorizerResult> {
+  const statements: Statement[] = [];
+
+  return {
+    principalId: jwt.payload.sub,
+    policyDocument: newPolicyDocument(statements),
+  };
 }
-
-export function generatePolicy(jwt: any, logEvent:ILogEvent): APIGatewayAuthorizerResult | PromiseLike<APIGatewayAuthorizerResult> {
-    const statements: Statement[] = [];
-
-    return {
-      principalId: jwt.payload.sub,
-      policyDocument: newPolicyDocument(statements),
-    };
-  }

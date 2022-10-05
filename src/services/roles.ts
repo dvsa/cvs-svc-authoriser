@@ -13,7 +13,7 @@ export default interface Role {
 
 const backwardsCompatibleRoleNames = ["CVSFullAccess", "CVSPsvTester", "CVSHgvTester", "CVSAdrTester", "CVSTirTester", "VTMAdmin"];
 
-export const getLegacyRoles = (token: any, logEvent:ILogEvent): Role[] => {
+export const getLegacyRoles = (token: any, logEvent: ILogEvent): Role[] => {
   const rolesOnToken = token.payload.roles;
 
   if (!rolesOnToken) {

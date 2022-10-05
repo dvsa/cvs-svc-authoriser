@@ -48,7 +48,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(2)
+    expect(returnValue.policyDocument.Statement.length).toEqual(2);
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
@@ -59,7 +59,6 @@ describe("authorizer() unit tests", () => {
       Action: "execute-api:Invoke",
       Resource: `arn:aws:execute-api:eu-west-1:*:*/*/HEAD/a-resource/with-child`,
     });
-
   });
 
   it("should return valid write statements on valid JWT", async () => {
