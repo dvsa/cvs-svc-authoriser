@@ -31,6 +31,23 @@ export const getLegacyRoles = (token: any, logEvent: ILogEvent): Role[] => {
       validRoles.push(newRole(role, "write"));
       continue; // < this may need to be removed in future if backwards-compatible role access differs across roles
     }
+
+    // new role - check basic formatting
+    const parts = role.split(".");
+
+    if (parts.length !== 2) {
+      continue;
+    }
+
+    const [name, access] = parts;
+
+    if (!name || !access) {
+      continue;
+    }
+
+    if (isOfTypeAccess(access.toLowerCase())) {
+      validRoles.push(newRole(name, access.toLowerCase()));
+    }
   }
 
   return validRoles;

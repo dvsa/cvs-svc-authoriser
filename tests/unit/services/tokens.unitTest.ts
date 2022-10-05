@@ -1,35 +1,29 @@
 import { getValidJwt } from "../../../src/services/tokens";
 import { JWT_MESSAGE } from "../../../src/models/enums";
 
+jest.mock("../../../src/services/signature-check", () => {
+  return { checkSignature: jest.fn().mockResolvedValue(true) };
+});
+
 describe("getValidJwt()", () => {
   it("should fail on blank authorization token", async () => {
-    expect(() => {
-      getValidJwt("", {});
-    }).toThrowError(JWT_MESSAGE.NO_AUTH_HEADER);
+    await expect(getValidJwt("", {})).rejects.toThrowError(JWT_MESSAGE.NO_AUTH_HEADER);
   });
 
   it("should fail on non-Bearer authorization token", async () => {
-    expect(() => {
-      getValidJwt("not a Bearer", {});
-    }).toThrowError(JWT_MESSAGE.NO_BEARER_PREFIX);
+    await expect(getValidJwt("not a Bearer", {})).rejects.toThrowError(JWT_MESSAGE.NO_BEARER_PREFIX);
   });
 
   it("should fail when Bearer prefix is present, but token value isn't", async () => {
-    expect(() => {
-      getValidJwt("Bearer", {});
-    }).toThrowError(JWT_MESSAGE.BLANK_TOKEN);
+    await expect(getValidJwt("Bearer", {})).rejects.toThrowError(JWT_MESSAGE.BLANK_TOKEN);
   });
 
   it("should fail when Bearer prefix is present, but token value is blank", async () => {
-    expect(() => {
-      getValidJwt("Bearer      ", {});
-    }).toThrowError(JWT_MESSAGE.BLANK_TOKEN);
+    await expect(getValidJwt("Bearer      ", {})).rejects.toThrowError(JWT_MESSAGE.BLANK_TOKEN);
   });
 
   it("should fail on invalid JWT token", async () => {
-    expect(() => {
-      getValidJwt("Bearer invalidJwt", {});
-    }).toThrowError(JWT_MESSAGE.DECODE_FAILED);
+    await expect(getValidJwt("Bearer invalidJwt", {})).rejects.toThrowError(JWT_MESSAGE.DECODE_FAILED);
   });
 
   it("should pass on valid JWT token without preferred_username or unique_name ", async () => {
@@ -37,7 +31,7 @@ describe("getValidJwt()", () => {
     const payload = "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJ0aWQiOiIxMjM0NTYiLCJleHAiOjYzMTAwNTMzNH0";
     const signature = "DUmbnmFG6y-AxpT578vTwVeHoT04LyAwcdhDdvxby_A";
 
-    expect(getValidJwt(`Bearer ${header}.${payload}.${signature}`, {})).toMatchObject({
+    expect(await getValidJwt(`Bearer ${header}.${payload}.${signature}`, {})).toMatchObject({
       header: {
         kid: "ABCDEF",
       },
@@ -52,7 +46,7 @@ describe("getValidJwt()", () => {
     const payload = "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJ0aWQiOiIxMjM0NTYiLCJleHAiOjYzMTAwNTMzNCwidW5pcXVlX25hbWUiOiJ0ZXN0In0";
     const signature = "DUmbnmFG6y-AxpT578vTwVeHoT04LyAwcdhDdvxby_A";
 
-    expect(getValidJwt(`Bearer ${header}.${payload}.${signature}`, {})).toMatchObject({
+    expect(await getValidJwt(`Bearer ${header}.${payload}.${signature}`, {})).toMatchObject({
       header: {
         kid: "ABCDEF",
       },
@@ -68,7 +62,7 @@ describe("getValidJwt()", () => {
     const payload = "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJ0aWQiOiIxMjM0NTYiLCJleHAiOjYzMTAwNTMzNCwicHJlZmVycmVkX3VzZXJuYW1lIjoidGVzdCJ9";
     const signature = "DUmbnmFG6y-AxpT578vTwVeHoT04LyAwcdhDdvxby_A";
 
-    expect(getValidJwt(`Bearer ${header}.${payload}.${signature}`, {})).toMatchObject({
+    expect(await getValidJwt(`Bearer ${header}.${payload}.${signature}`, {})).toMatchObject({
       header: {
         kid: "ABCDEF",
       },

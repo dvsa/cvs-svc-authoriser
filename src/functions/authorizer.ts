@@ -1,8 +1,8 @@
 import { APIGatewayTokenAuthorizerEvent, Context, Statement } from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
-import { generatePolicy as generateLegacyPolicy } from "./legacyPolicyFactory";
-import { generatePolicy as generateRolePolicy } from "./rolePolicyFactory";
+import { generatePolicy as generateLegacyPolicy } from "./rolePolicyFactory";
+import { generatePolicy as generateRolePolicy } from "./functionalPolicyFactory";
 import Role, { getLegacyRoles } from "../services/roles";
 import { getValidJwt } from "../services/tokens";
 import { JWT_MESSAGE } from "../models/enums";
@@ -21,7 +21,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
   const logEvent: ILogEvent = {};
   try {
     initialiseLogEvent(event);
-    const jwt: any = getValidJwt(event.authorizationToken, logEvent);
+    const jwt: any = await getValidJwt(event.authorizationToken, logEvent);
 
     const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
