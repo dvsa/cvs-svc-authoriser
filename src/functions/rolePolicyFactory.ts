@@ -23,7 +23,7 @@ const Configuration: AuthorizerConfig = {
   VTMAdmin: ["/*"],
   Certs: ["/*"],
   VehicleData: ["/*"],
-  DVLATrailers: ["/*/trailers", "/*/trailers/*"]
+  DVLATrailers: ["/*/trailers", "/*/trailers/*"],
 };
 
 interface AuthorizerConfig {
@@ -64,12 +64,11 @@ const roleToStatement = (resource: string, childResource: string | null, httpVer
   return new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build();
 };
 
-export function generatePolicy(jwt: any, logEvent:ILogEvent): APIGatewayAuthorizerResult | undefined {
+export function generatePolicy(jwt: any, logEvent: ILogEvent): APIGatewayAuthorizerResult | undefined {
   let statements: Statement[] = [];
   const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
-  if(!legacyRoles || legacyRoles.length === 0)
-  {
+  if (!legacyRoles || legacyRoles.length === 0) {
     return undefined;
   }
 

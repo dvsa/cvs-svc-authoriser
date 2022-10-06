@@ -22,7 +22,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     initialiseLogEvent(event);
     const jwt: any = await getValidJwt(event.authorizationToken, logEvent);
 
-    const policy = generateRolePolicy(jwt, logEvent) ?? await generateFunctionalPolicy(jwt, logEvent)
+    const policy = generateRolePolicy(jwt, logEvent) ?? (await generateFunctionalPolicy(jwt, logEvent));
 
     if (policy !== undefined) {
       return policy;
