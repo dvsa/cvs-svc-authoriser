@@ -67,12 +67,8 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should return valid view statement on valid JWT", async () => {
-    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([
-      {
-        name: "TechRecord",
-        access: "view",
-      },
-    ]);
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    jwtJson.payload.roles = ["TechRecord.View"];
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
@@ -86,8 +82,19 @@ describe("authorizer() unit tests", () => {
     });
   });
 
-  it("should return an unauthorised policy response", async () => {
+  it("should return multiple statements when multiple roles are valid", async () => {
     (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    jwtJson.payload.roles = ["TechRecord.View", "TechRecord.Amend"];
+
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+
+    expect(returnValue.policyDocument.Statement.length).toEqual(3);
+  });
+
+  it("should return an unauthorised policy response", async () => {
+    jwtJson.payload.roles = [];
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 

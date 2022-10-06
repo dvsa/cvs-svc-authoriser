@@ -1,9 +1,8 @@
 import { APIGatewayTokenAuthorizerEvent, Context, Statement } from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
-import { generatePolicy as generateLegacyPolicy } from "./rolePolicyFactory";
-import { generatePolicy as generateRolePolicy } from "./functionalPolicyFactory";
-import Role, { getLegacyRoles } from "../services/roles";
+import { generatePolicy as generateRolePolicy } from "./rolePolicyFactory";
+import { generatePolicy as generateFunctionalPolicy } from "./functionalPolicyFactory";
 import { getValidJwt } from "../services/tokens";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
@@ -23,16 +22,10 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     initialiseLogEvent(event);
     const jwt: any = await getValidJwt(event.authorizationToken, logEvent);
 
-    const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
+    const policy = generateRolePolicy(jwt, logEvent) ?? await generateFunctionalPolicy(jwt, logEvent)
 
-    if (legacyRoles && legacyRoles.length > 0) {
-      return generateLegacyPolicy(jwt, legacyRoles);
-    }
-
-    const roleBasedPolicy = await generateRolePolicy(jwt, logEvent);
-
-    if (roleBasedPolicy) {
-      return roleBasedPolicy;
+    if (policy !== undefined) {
+      return policy;
     }
 
     reportNoValidRoles(jwt, event, context, logEvent);

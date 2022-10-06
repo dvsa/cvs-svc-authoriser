@@ -1,7 +1,8 @@
 import { APIGatewayAuthorizerResult, Statement } from "aws-lambda";
 import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
+import { ILogEvent } from "../models/ILogEvent";
 import { HttpVerb } from "../services/http-verbs";
-import Role from "../services/roles";
+import Role, { getLegacyRoles } from "../services/roles";
 import StatementBuilder from "../services/StatementBuilder";
 import newPolicyDocument from "./newPolicyDocument";
 
@@ -22,8 +23,7 @@ const Configuration: AuthorizerConfig = {
   VTMAdmin: ["/*"],
   Certs: ["/*"],
   VehicleData: ["/*"],
-  DVLATrailers: ["/*/trailers", "/*/trailers/*"],
-  "TechRecord.View": ["/vehicles/*"],
+  DVLATrailers: ["/*/trailers", "/*/trailers/*"]
 };
 
 interface AuthorizerConfig {
@@ -33,10 +33,6 @@ interface AuthorizerConfig {
 const getAssociatedResources = (role: Role): string[] => {
   if (Configuration[role.name] !== undefined) {
     return Configuration[role.name];
-  }
-
-  if (role.name === "TechRecord" && role.access === "view") {
-    return Configuration["TechRecord.View"];
   }
 
   return [];
@@ -68,8 +64,14 @@ const roleToStatement = (resource: string, childResource: string | null, httpVer
   return new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build();
 };
 
-export function generatePolicy(jwt: any, legacyRoles: Role[]): APIGatewayAuthorizerResult | PromiseLike<APIGatewayAuthorizerResult> {
+export function generatePolicy(jwt: any, logEvent:ILogEvent): APIGatewayAuthorizerResult | undefined {
   let statements: Statement[] = [];
+  const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
+
+  if(!legacyRoles || legacyRoles.length === 0)
+  {
+    return undefined;
+  }
 
   for (const role of legacyRoles) {
     const items = roleToStatements(role);
