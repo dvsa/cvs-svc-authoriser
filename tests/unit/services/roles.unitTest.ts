@@ -15,16 +15,6 @@ describe("getLegacyRoles()", () => {
     });
   });
 
-  it("should return list of valid roles for TechRecord.View", () => {
-    const roles: Role[] = getLegacyRoles(tokenWithRoles(["TechRecord.View"]), {});
-    expect(roles.length).toEqual(1);
-
-    expect(roles).toContainEqual({
-      name: "TechRecord",
-      access: "view",
-    });
-  });
-
   it("should return backwards-compatible roles with write access", () => {
     const roles: Role[] = getLegacyRoles(tokenWithRoles(["CVSFullAccess"]), {});
 
