@@ -10,7 +10,7 @@ type NonEmptyArray<T> = [T, ...T[]];
 
 const accessToHttpVerbs: AccessHttpVerbMap = {
   read: ["GET", "HEAD"],
-  write: ["*"]
+  write: ["*"],
 };
 
 const Configuration: AuthorizerConfig = {
