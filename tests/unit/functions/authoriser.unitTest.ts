@@ -102,16 +102,15 @@ describe("authorizer() unit tests", () => {
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
     expect(returnValue.policyDocument.Statement.length).toEqual(2);
 
-    const post:{Action:string, Effect:string, Resource:string} = returnValue.policyDocument.Statement[0] as unknown as {Action:string, Effect:string, Resource:string};
+    const post: { Action: string; Effect: string; Resource: string } = returnValue.policyDocument.Statement[0] as unknown as { Action: string; Effect: string; Resource: string };
     expect(post.Effect).toEqual("Allow");
     expect(post.Action).toEqual("execute-api:Invoke");
     expect(post.Resource).toEqual("arn:aws:execute-api:eu-west-1:*:*/*/POST/vehicles/*");
 
-    const put:{Action:string, Effect:string, Resource:string} = returnValue.policyDocument.Statement[1] as unknown as {Action:string, Effect:string, Resource:string};
+    const put: { Action: string; Effect: string; Resource: string } = returnValue.policyDocument.Statement[1] as unknown as { Action: string; Effect: string; Resource: string };
     expect(put.Effect).toEqual("Allow");
     expect(put.Action).toEqual("execute-api:Invoke");
     expect(put.Resource).toEqual("arn:aws:execute-api:eu-west-1:*:*/*/PUT/vehicles/*");
-
   });
 
   it("should return an unauthorised policy response", async () => {
