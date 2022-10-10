@@ -1,4 +1,4 @@
-import { APIGatewayTokenAuthorizerEvent, Context } from "aws-lambda";
+import { APIGatewayTokenAuthorizerEvent, BaseStatement, Context, MaybeStatementResource, Statement, StatementAction } from "aws-lambda";
 import { StatusCodeError } from "request-promise/errors";
 import { authorizer } from "../../../src/functions/authorizer";
 import { IncomingMessage } from "http";
@@ -91,6 +91,27 @@ describe("authorizer() unit tests", () => {
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
 
     expect(returnValue.policyDocument.Statement.length).toEqual(3);
+  });
+
+  it("should return an accurate policy based on functional roles", async () => {
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    jwtJson.payload.roles = ["TechRecord.Amend"];
+
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+    expect(returnValue.policyDocument.Statement.length).toEqual(2);
+
+    const post:{Action:string, Effect:string, Resource:string} = returnValue.policyDocument.Statement[0] as unknown as {Action:string, Effect:string, Resource:string};
+    expect(post.Effect).toEqual("Allow");
+    expect(post.Action).toEqual("execute-api:Invoke");
+    expect(post.Resource).toEqual("arn:aws:execute-api:eu-west-1:*:*/*/POST/vehicles/*");
+
+    const put:{Action:string, Effect:string, Resource:string} = returnValue.policyDocument.Statement[1] as unknown as {Action:string, Effect:string, Resource:string};
+    expect(put.Effect).toEqual("Allow");
+    expect(put.Action).toEqual("execute-api:Invoke");
+    expect(put.Resource).toEqual("arn:aws:execute-api:eu-west-1:*:*/*/PUT/vehicles/*");
+
   });
 
   it("should return an unauthorised policy response", async () => {
