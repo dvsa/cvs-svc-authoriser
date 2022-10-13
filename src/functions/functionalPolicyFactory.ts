@@ -28,6 +28,45 @@ const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "vehicles/*",
     },
   ],
+  "TestResult.Amend": [
+    {
+      verb: "POST",
+      path: "test-result/*",
+    },
+    {
+      verb: "PUT",
+      path: "test-result/*",
+    },
+    {
+      verb: "GET",
+      path: "test-types/*",
+    },
+    {
+      verb: "GET",
+      path: "test-stations/*",
+    },
+    {
+      verb: "GET",
+      path: "defects/*",
+    },
+    {
+      verb: "GET",
+      path: "reference/*",
+    },
+  ],
+  "TestResult.View": [
+    {
+      verb: "GET",
+      path: "test-result/*",
+    },
+    {
+      verb: "GET",
+      path: "test-types/*",
+    },
+    {
+      verb: "GET",
+      path: "v1/document-retrieval/*",
+    },
 };
 
 function toStatement(access: IApiAccess): Statement {
