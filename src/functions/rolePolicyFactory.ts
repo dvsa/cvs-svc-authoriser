@@ -20,8 +20,8 @@ const Configuration: AuthorizerConfig = {
   CVSAdrTester: ["/*"],
   CVSTirTester: ["/*"],
   VTMAdmin: ["/*"],
-  Certs: ["/*/v1/document-retrieval","/*/v1/document-retrieval/*"],
-  VehicleData: ["/*/v1/enquiry","/*/v1/enquiry/*"],
+  Certs: ["/*/v1/document-retrieval", "/*/v1/document-retrieval/*"],
+  VehicleData: ["/*/v1/enquiry", "/*/v1/enquiry/*"],
   DVLATrailers: ["/*/trailers", "/*/trailers/*"],
 };
 
