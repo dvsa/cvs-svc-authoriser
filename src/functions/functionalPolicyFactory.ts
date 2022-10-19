@@ -4,16 +4,15 @@ import { ILogEvent } from "../models/ILogEvent";
 import StatementBuilder from "../services/StatementBuilder";
 import { functionConfig, IApiAccess } from "./functionalConfig";
 
-function toStatement(access: IApiAccess): Statement {
-  return new StatementBuilder().setEffect("Allow").setHttpVerb(access.verb).setResource(access.path).build();
+function toStatements(access: IApiAccess): Statement[] {
+  return access.verbs.map(v => new StatementBuilder().setEffect("Allow").setHttpVerb(v).setResource(access.path).build());
 }
 
 export function generatePolicy(jwt: any, logEvent: ILogEvent): APIGatewayAuthorizerResult | undefined {
-  const statementSets = jwt.payload.roles
+  const statements = jwt.payload.roles
     .map((r: string) => functionConfig[r])
     .filter((i: IApiAccess[]) => i !== undefined)
-    .map((i: IApiAccess[]) => i.map((ia) => toStatement(ia)));
-  const statements = [].concat.apply([], statementSets);
+    .map((i: IApiAccess[]) => i.map((ia) => toStatements(ia)).flat()).flat();
 
   if (statements.length === 0) {
     return undefined;

@@ -1,64 +1,56 @@
 import { HttpVerb } from "../services/http-verbs";
 export type NonEmptyArray<T> = [T, ...T[]];
 export interface IApiAccess {
-  verb: HttpVerb;
+  verbs: HttpVerb[];
   path: string;
 }
 
 export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
   "TechRecord.Amend": [
     {
-      verb: "POST",
-      path: "vehicles/*",
-    },
-    {
-      verb: "PUT",
+      verbs: ["POST", "PUT", "OPTIONS"],
       path: "vehicles/*",
     },
   ],
   "TechRecord.View": [
     {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "vehicles/*",
     },
   ],
   "TestResult.Amend": [
     {
-      verb: "POST",
+      verbs: ["POST", "PUT", "OPTIONS"],
       path: "test-result/*",
     },
     {
-      verb: "PUT",
-      path: "test-result/*",
-    },
-    {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "test-types/*",
     },
     {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "test-stations/*",
     },
     {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "defects/*",
     },
     {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "reference/*",
     },
   ],
   "TestResult.View": [
     {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "test-result/*",
     },
     {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "test-types/*",
     },
     {
-      verb: "GET",
+      verbs: ["GET", "OPTIONS"],
       path: "v1/document-retrieval/*",
     },
   ],
