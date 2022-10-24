@@ -1,34 +1,39 @@
-import * as JWT from "jsonwebtoken";
+import { decode, Jwt, JwtPayload, verify} from "jsonwebtoken";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
 import { checkSignature } from "./signature-check";
 
-export const getValidJwt = async (authorizationToken: string, logEvent: ILogEvent): Promise<any> => {
+interface CVSJWTPayload extends JwtPayload{
+  unique_name:string,
+  preferred_username:string
+}
+
+export const getValidJwt = async (authorizationToken: string, logEvent: ILogEvent, tenantId:string, clientId:string): Promise<any> => {
   checkFormat(authorizationToken);
 
   authorizationToken = authorizationToken.substring(7); // remove 'Bearer '
 
-  const decoded: any = JWT.decode(authorizationToken, { complete: true });
+  const decoded: Jwt|null = decode(authorizationToken, { complete: true });
 
   if (!decoded) {
     throw new Error(JWT_MESSAGE.DECODE_FAILED);
   }
 
-  // Token should be ignored if it's not valid
-  await checkSignature(authorizationToken, decoded);
+  await checkSignature(authorizationToken, decoded, tenantId, clientId);
 
   let username;
+  const payload = decoded.payload as CVSJWTPayload;
 
-  if (decoded.payload.unique_name) {
-    username = decoded.payload.unique_name;
-  } else if (decoded.payload.preferred_username) {
-    username = decoded.payload.preferred_username;
+  if (decoded.payload) {
+    username = payload.unique_name;
+  } else if (payload.preferred_username) {
+    username = payload.preferred_username;
   } else {
     username = "No data available in token";
   }
 
   logEvent.email = username;
-  logEvent.tokenExpiry = new Date(decoded.payload.exp * 1000).toISOString();
+  logEvent.tokenExpiry = new Date((payload.exp as number) * 1000).toISOString();
   return decoded;
 };
 

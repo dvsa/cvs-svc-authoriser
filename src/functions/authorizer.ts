@@ -9,6 +9,9 @@ import { ILogEvent } from "../models/ILogEvent";
 import { writeLogMessage } from "../common/Logger";
 import newPolicyDocument from "./newPolicyDocument";
 
+const tenantId = process.env.AZURE_TENANT_ID;
+const clientId = process.env.AZURE_CLIENT_ID;
+
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
  * and to verify its integrity and validity.
@@ -18,9 +21,15 @@ import newPolicyDocument from "./newPolicyDocument";
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   const logEvent: ILogEvent = {};
+
+  if(!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID)
+  {
+    return unauthorisedPolicy();
+  }
+
   try {
     initialiseLogEvent(event);
-    const jwt: any = await getValidJwt(event.authorizationToken, logEvent);
+    const jwt: any = await getValidJwt(event.authorizationToken, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
 
     const policy = generateRolePolicy(jwt, logEvent) ?? (await generateFunctionalPolicy(jwt, logEvent));
 
