@@ -22,8 +22,7 @@ const clientId = process.env.AZURE_CLIENT_ID;
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   const logEvent: ILogEvent = {};
 
-  if(!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID)
-  {
+  if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID) {
     return unauthorisedPolicy();
   }
 

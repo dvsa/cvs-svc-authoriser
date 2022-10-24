@@ -5,8 +5,8 @@ jest.mock("../../../src/services/signature-check", () => {
   return { checkSignature: jest.fn().mockResolvedValue(true) };
 });
 
-const DEFAULT_TENANT_ID:string = "";
-const DEFAULT_CLIENT_ID:string = "";
+const DEFAULT_TENANT_ID: string = "";
+const DEFAULT_CLIENT_ID: string = "";
 
 describe("getValidJwt()", () => {
   it("should fail on blank authorization token", async () => {

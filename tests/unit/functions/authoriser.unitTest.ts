@@ -15,8 +15,8 @@ const event: APIGatewayTokenAuthorizerEvent = {
 
 describe("authorizer() unit tests", () => {
   beforeEach(() => {
-    jest.resetModules() // Most important - it clears the cache
-    process.env = { AZURE_TENANT_ID:'tenant',AZURE_CLIENT_ID:'client' };
+    jest.resetModules(); // Most important - it clears the cache
+    process.env = { AZURE_TENANT_ID: "tenant", AZURE_CLIENT_ID: "client" };
     (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
   });
 

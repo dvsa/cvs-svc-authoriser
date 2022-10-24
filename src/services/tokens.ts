@@ -1,19 +1,19 @@
-import { decode, Jwt, JwtPayload, verify} from "jsonwebtoken";
+import { decode, Jwt, JwtPayload, verify } from "jsonwebtoken";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
 import { checkSignature } from "./signature-check";
 
-interface CVSJWTPayload extends JwtPayload{
-  unique_name:string,
-  preferred_username:string
+interface CVSJWTPayload extends JwtPayload {
+  unique_name: string;
+  preferred_username: string;
 }
 
-export const getValidJwt = async (authorizationToken: string, logEvent: ILogEvent, tenantId:string, clientId:string): Promise<any> => {
+export const getValidJwt = async (authorizationToken: string, logEvent: ILogEvent, tenantId: string, clientId: string): Promise<any> => {
   checkFormat(authorizationToken);
 
   authorizationToken = authorizationToken.substring(7); // remove 'Bearer '
 
-  const decoded: Jwt|null = decode(authorizationToken, { complete: true });
+  const decoded: Jwt | null = decode(authorizationToken, { complete: true });
 
   if (!decoded) {
     throw new Error(JWT_MESSAGE.DECODE_FAILED);
