@@ -43,7 +43,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
   }
 };
 
-const unauthorisedPolicy = (logEvent:ILogEvent): APIGatewayAuthorizerResult => {
+const unauthorisedPolicy = (logEvent: ILogEvent): APIGatewayAuthorizerResult => {
   const statements: Statement[] = [new StatementBuilder().setEffect("Deny").build()];
 
   return {

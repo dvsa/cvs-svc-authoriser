@@ -11,8 +11,7 @@ export const writeLogMessage = (log: ILogEvent, error?: any) => {
     log.statusCode = 401;
     if (!error.name) {
       logError.message = error as string;
-    }
-    else {
+    } else {
       switch (error.name) {
         case "TokenExpiredError":
           logError.name = "TokenExpiredError";
