@@ -1,4 +1,4 @@
-import { logEvent } from "../functions/authorizer";
+import { ILogEvent } from "../models/ILogEvent";
 
 export type Access = "read" | "write" | "view";
 
@@ -13,7 +13,7 @@ export default interface Role {
 
 const backwardsCompatibleRoleNames = ["CVSFullAccess", "CVSPsvTester", "CVSHgvTester", "CVSAdrTester", "CVSTirTester", "VTMAdmin"];
 
-export const getValidRoles = (token: any): Role[] => {
+export const getValidRoles = (token: any, logEvent: ILogEvent): Role[] => {
   const rolesOnToken = token.payload.roles;
 
   if (!rolesOnToken) {

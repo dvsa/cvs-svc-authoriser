@@ -8,12 +8,8 @@ import { AuthorizerConfig, configuration, getAssociatedResources } from "../serv
 import { HttpVerb } from "../services/http-verbs";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
-import { ILogError } from "../models/ILogError";
 import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
 import { writeLogMessage } from "../common/Logger";
-
-export let logError: ILogError = {};
-export let logEvent: ILogEvent = {};
 
 const accessToHttpVerbs: AccessHttpVerbMap = {
   read: ["GET", "HEAD"],
@@ -29,17 +25,17 @@ const accessToHttpVerbs: AccessHttpVerbMap = {
  * @returns - Promise<APIGatewayAuthorizerResult>
  */
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
+  const logEvent = initialiseLogEvent(event);
   try {
-    initialiseLogEvent(event);
     // fail-fast if config is missing or invalid
     const config: AuthorizerConfig = await configuration();
 
-    const jwt: any = getValidJwt(event.authorizationToken);
+    const jwt: any = getValidJwt(event.authorizationToken, logEvent);
 
-    const validRoles: Role[] = getValidRoles(jwt);
+    const validRoles: Role[] = getValidRoles(jwt, logEvent);
 
     if (!validRoles || validRoles.length === 0) {
-      reportNoValidRoles(jwt, event, context);
+      reportNoValidRoles(jwt, event, context, logEvent);
       writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
       return unauthorisedPolicy();
     }
@@ -61,7 +57,6 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     };
   } catch (error: any) {
     writeLogMessage(logEvent, error);
-    dumpArguments(event, context);
     return unauthorisedPolicy();
   }
 };
@@ -108,28 +103,22 @@ const newPolicyDocument = (statements: Statement[]): PolicyDocument => {
   };
 };
 
-const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
+const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context, logEvent: ILogEvent): void => {
   const roles = jwt.payload.roles;
   if (roles && roles.length === 0) {
     logEvent.message = JWT_MESSAGE.NO_ROLES;
   } else {
     logEvent.message = JWT_MESSAGE.INVALID_ROLES;
   }
-  dumpArguments(event, context);
-};
-
-const dumpArguments = (event: APIGatewayTokenAuthorizerEvent, context: Context): void => {
-  console.error("Event dump  : ", JSON.stringify(event));
-  console.error("Context dump: ", JSON.stringify(context));
 };
 
 /**
  * This method is being used in order to clear the ILogEvent, ILogError objects and populate the request url and the time of request
  * @param event
  */
-const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent) => {
-  logEvent = {};
-  logError = {};
-  logEvent.requestUrl = event.methodArn;
-  logEvent.timeOfRequest = new Date().toISOString();
+const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent): ILogEvent => {
+  return {
+    requestUrl: event.methodArn,
+    timeOfRequest: new Date().toISOString(),
+  };
 };
