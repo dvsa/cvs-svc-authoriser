@@ -1,13 +1,13 @@
 import * as JWT from "jsonwebtoken";
 import { getCertificateChain } from "./azure";
 
-export const checkSignature = async (encodedToken: string, decodedToken: any): Promise<void> => {
+export const checkSignature = async (encodedToken: string, decodedToken: any, tenantId: string, clientId: string): Promise<void> => {
   // tid = tenant ID, kid = key ID
-  const certificate = await getCertificateChain(decodedToken.payload.tid, decodedToken.header.kid);
+  const certificate = await getCertificateChain(tenantId, decodedToken.header.kid);
 
   JWT.verify(encodedToken, certificate, {
-    audience: decodedToken.payload.aud,
-    issuer: decodedToken.payload.iss,
+    audience: clientId,
+    issuer: `https://sts.windows.net/${tenantId}/`,
     algorithms: ["RS256"],
   });
 };

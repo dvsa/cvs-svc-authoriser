@@ -1,15 +1,11 @@
-import { APIGatewayTokenAuthorizerEvent, Context } from "aws-lambda";
+import { APIGatewayTokenAuthorizerEvent, BaseStatement, Context, MaybeStatementResource, Statement, StatementAction } from "aws-lambda";
 import { StatusCodeError } from "request-promise/errors";
 import { authorizer } from "../../../src/functions/authorizer";
 import { IncomingMessage } from "http";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
-import { checkSignature } from "../../../src/services/signature-check";
-import { getValidRoles } from "../../../src/services/roles";
+import { getLegacyRoles } from "../../../src/services/roles";
 import jwtJson from "../../resources/jwt.json";
 import { getValidJwt } from "../../../src/services/tokens";
-import { configuration } from "../../../src/services/configuration";
-import * as fs from "fs";
-import { safeLoad } from "js-yaml";
 
 const event: APIGatewayTokenAuthorizerEvent = {
   type: "TOKEN",
@@ -19,58 +15,46 @@ const event: APIGatewayTokenAuthorizerEvent = {
 
 describe("authorizer() unit tests", () => {
   beforeEach(() => {
-    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-test.yml", "utf-8")));
-
+    jest.resetModules(); // Most important - it clears the cache
+    process.env = { AZURE_TENANT_ID: "tenant", AZURE_CLIENT_ID: "client" };
     (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJson);
-
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
-      {
-        name: "a-role",
-        access: "read",
-      },
-    ]);
-
-    (checkSignature as jest.Mock) = jest.fn().mockImplementation(() => {
-      /* circumvent TSLint no-empty */
-    });
   });
 
   it("should fail on non-2xx HTTP status", async () => {
-    (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(new StatusCodeError(418, "I'm a teapot", { url: "http://example.org" }, {} as IncomingMessage));
+    (getValidJwt as jest.Mock) = jest.fn().mockRejectedValue(new StatusCodeError(418, "I'm a teapot", { url: "http://example.org" }, {} as IncomingMessage));
 
     await expectUnauthorised(event);
   });
 
   it("should fail on JWT signature check error", async () => {
-    (checkSignature as jest.Mock) = jest.fn().mockRejectedValue(new Error("test-signature-error"));
+    (getValidJwt as jest.Mock) = jest.fn().mockRejectedValue(new Error("test-signature-error"));
 
     await expectUnauthorised(event);
   });
 
   it("should return valid read-only statements on valid JWT", async () => {
+    const jwtJsonClone = JSON.parse(JSON.stringify(jwtJson));
+    jwtJsonClone.payload.roles = ["CVSFullAccess.read"];
+    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJsonClone);
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
-
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
     expect(returnValue.policyDocument.Statement.length).toEqual(2);
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
-      Resource: `arn:aws:execute-api:eu-west-1:*:*/*/GET/a-resource/with-child`,
+      Resource: `arn:aws:execute-api:eu-west-1:*:*/*/GET/*`,
     });
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
-      Resource: `arn:aws:execute-api:eu-west-1:*:*/*/HEAD/a-resource/with-child`,
+      Resource: `arn:aws:execute-api:eu-west-1:*:*/*/HEAD/*`,
     });
   });
 
   it("should return valid write statements on valid JWT", async () => {
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
-      {
-        name: "a-role",
-        access: "write",
-      },
-    ]);
+    const jwtJsonClone = JSON.parse(JSON.stringify(jwtJson));
+    jwtJsonClone.payload.roles = ["CVSFullAccess.write"];
+    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJsonClone);
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
@@ -80,25 +64,19 @@ describe("authorizer() unit tests", () => {
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
-      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/*/a-resource/with-child",
+      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/*/*",
     });
   });
 
   it("should return valid view statement on valid JWT", async () => {
-    (configuration as jest.Mock) = jest.fn().mockReturnValue(safeLoad(fs.readFileSync("tests/resources/config-test-tech-record.yml", "utf-8")));
-
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([
-      {
-        name: "TechRecord",
-        access: "view",
-      },
-    ]);
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    jwtJson.payload.roles = ["TechRecord.View"];
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
 
-    expect(returnValue.policyDocument.Statement.length).toEqual(1);
+    expect(returnValue.policyDocument.Statement.length).toEqual(2);
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
@@ -106,8 +84,38 @@ describe("authorizer() unit tests", () => {
     });
   });
 
+  it("should return multiple statements when multiple roles are valid", async () => {
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    jwtJson.payload.roles = ["TechRecord.View", "TechRecord.Amend"];
+
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+    expect(returnValue.policyDocument.Statement.length).toEqual(5);
+  });
+
+  it("should return an accurate policy based on functional roles", async () => {
+    (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    jwtJson.payload.roles = ["TechRecord.Amend"];
+
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+    expect(returnValue.policyDocument.Statement.length).toEqual(3);
+
+    const post: { Action: string; Effect: string; Resource: string } = returnValue.policyDocument.Statement[0] as unknown as { Action: string; Effect: string; Resource: string };
+    expect(post.Effect).toEqual("Allow");
+    expect(post.Action).toEqual("execute-api:Invoke");
+    expect(post.Resource).toEqual("arn:aws:execute-api:eu-west-1:*:*/*/POST/vehicles/*");
+
+    const put: { Action: string; Effect: string; Resource: string } = returnValue.policyDocument.Statement[1] as unknown as { Action: string; Effect: string; Resource: string };
+    expect(put.Effect).toEqual("Allow");
+    expect(put.Action).toEqual("execute-api:Invoke");
+    expect(put.Resource).toEqual("arn:aws:execute-api:eu-west-1:*:*/*/PUT/vehicles/*");
+  });
+
   it("should return an unauthorised policy response", async () => {
-    (getValidRoles as jest.Mock) = jest.fn().mockReturnValue([]);
+    jwtJson.payload.roles = [];
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 

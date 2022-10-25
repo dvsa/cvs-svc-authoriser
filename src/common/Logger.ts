@@ -7,6 +7,7 @@ export const writeLogMessage = (log: ILogEvent, error?: any) => {
     log.statusCode = 200;
     console.log(log);
   } else {
+    const logError: ILogError = {};
     log.statusCode = 401;
     const logError: ILogError = {};
     switch (error.name) {
