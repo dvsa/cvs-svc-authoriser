@@ -21,7 +21,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
   if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID) {
     writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ID_SETUP);
-    return unauthorisedPolicy(logEvent);
+    return unauthorisedPolicy();
   }
 
   try {
@@ -36,14 +36,14 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
     reportNoValidRoles(jwt, event, context, logEvent);
     writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
-    return unauthorisedPolicy(logEvent);
+    return unauthorisedPolicy();
   } catch (error: any) {
     writeLogMessage(logEvent, error);
-    return unauthorisedPolicy(logEvent);
+    return unauthorisedPolicy();
   }
 };
 
-const unauthorisedPolicy = (logEvent: ILogEvent): APIGatewayAuthorizerResult => {
+const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
   const statements: Statement[] = [new StatementBuilder().setEffect("Deny").build()];
 
   return {
