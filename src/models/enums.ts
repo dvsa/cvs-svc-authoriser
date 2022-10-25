@@ -8,4 +8,5 @@ export enum JWT_MESSAGE {
   EXPIRED = "[JWT-ERROR-07]",
   NOT_BEFORE = "[JWT-ERROR-08]",
   ERROR = "[JWT-ERROR-09]",
+  INVALID_ID_SETUP = "[JWT-ERROR-10] No tenant or client ID set",
 }
