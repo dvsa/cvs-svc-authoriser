@@ -24,15 +24,13 @@ export const getValidJwt = async (authorizationToken: string, logEvent: ILogEven
   let username;
   const payload = decoded.payload as CVSJWTPayload;
 
-  if(!payload)
-  {
-    username = "No data available in token"
-  }
-  else {
+  if (!payload) {
+    username = "No data available in token";
+  } else {
     if (payload.preferred_username) {
       username = payload.preferred_username;
     } else {
-      username = payload.unique_name
+      username = payload.unique_name;
     }
   }
 
