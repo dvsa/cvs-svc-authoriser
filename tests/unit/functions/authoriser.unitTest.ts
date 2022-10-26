@@ -123,7 +123,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(5);
+    expect(returnValue.policyDocument.Statement.length).toEqual(7);
   });
 
   it("should return an accurate policy based on functional roles", async () => {
@@ -133,7 +133,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(3);
+    expect(returnValue.policyDocument.Statement.length).toEqual(5);
 
     const post: { Action: string; Effect: string; Resource: string } = returnValue.policyDocument.Statement[0] as unknown as { Action: string; Effect: string; Resource: string };
     expect(post.Effect).toEqual("Allow");
