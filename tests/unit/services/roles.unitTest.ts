@@ -101,8 +101,8 @@ describe("getLegacyRoles()", () => {
 
   const tokenWithRoles = (roles: string[]): Jwt => {
     return {
-      header:{alg:""},
-      signature:"",
+      header: { alg: "" },
+      signature: "",
       payload: {
         roles,
       },
