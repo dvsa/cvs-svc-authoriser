@@ -12,7 +12,7 @@ export default interface Role {
   access: Access;
 }
 
-const backwardsCompatibleRoleNames = ["CVSFullAccess", "CVSPsvTester", "CVSHgvTester", "CVSAdrTester", "CVSTirTester", "VTMAdmin"];
+const backwardsCompatibleRoleNames = ["CVSFullAccess", "CVSPsvTester", "CVSHgvTester", "CVSAdrTester", "CVSTirTester", "VTMAdmin", "Certs", "VehicleData", "DVLATrailers"];
 
 export const getLegacyRoles = (token: Jwt, logEvent: ILogEvent): Role[] => {
   const rolesOnToken = (token.payload as JwtPayload).roles;

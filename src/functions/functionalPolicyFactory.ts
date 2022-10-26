@@ -25,6 +25,5 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     policyDocument: newPolicyDocument(statements),
   };
 
-  console.log("POLICY:" + JSON.stringify(returnValue));
   return returnValue;
 }

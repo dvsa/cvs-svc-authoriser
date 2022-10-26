@@ -68,6 +68,38 @@ describe("authorizer() unit tests", () => {
     });
   });
 
+  it("should return valid trailer read statements on valid JWT", async () => {
+    const jwtJsonClone = JSON.parse(JSON.stringify(jwtJson));
+    jwtJsonClone.payload.roles = ["DVLATrailers.read"];
+    (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJsonClone);
+
+    const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+
+    expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
+
+    expect(returnValue.policyDocument.Statement.length).toEqual(4);
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: "Allow",
+      Action: "execute-api:Invoke",
+      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/GET/v1/trailers",
+    });
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: "Allow",
+      Action: "execute-api:Invoke",
+      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/GET/v1/trailers/*",
+    });
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: "Allow",
+      Action: "execute-api:Invoke",
+      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/HEAD/v1/trailers",
+    });
+    expect(returnValue.policyDocument.Statement).toContainEqual({
+      Effect: "Allow",
+      Action: "execute-api:Invoke",
+      Resource: "arn:aws:execute-api:eu-west-1:*:*/*/HEAD/v1/trailers/*",
+    });
+  });
+
   it("should return valid view statement on valid JWT", async () => {
     (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
     jwtJson.payload.roles = ["TechRecord.View"];

@@ -1,5 +1,5 @@
 import { APIGatewayAuthorizerResult, Statement } from "aws-lambda";
-import { Jwt } from "jsonwebtoken";
+import { Jwt, JwtPayload } from "jsonwebtoken";
 import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
 import { ILogEvent } from "../models/ILogEvent";
 import { HttpVerb } from "../services/http-verbs";
@@ -21,9 +21,9 @@ const Configuration: AuthorizerConfig = {
   CVSAdrTester: ["/*"],
   CVSTirTester: ["/*"],
   VTMAdmin: ["/*"],
-  Certs: ["/*/v1/document-retrieval", "/*/v1/document-retrieval/*"],
-  VehicleData: ["/*/v1/enquiry", "/*/v1/enquiry/*"],
-  DVLATrailers: ["/*/trailers", "/*/trailers/*"],
+  Certs: ["/v1/document-retrieval", "/v1/document-retrieval/*"],
+  VehicleData: ["/v1/enquiry", "/v1/enquiry/*"],
+  DVLATrailers: ["/v1/trailers", "/v1/trailers/*"],
 };
 
 interface AuthorizerConfig {
@@ -66,6 +66,7 @@ const roleToStatement = (resource: string, childResource: string | null, httpVer
 
 export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthorizerResult | undefined {
   let statements: Statement[] = [];
+
   const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
   if (!legacyRoles || legacyRoles.length === 0) {
