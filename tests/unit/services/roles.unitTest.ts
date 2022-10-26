@@ -1,3 +1,4 @@
+import { Jwt } from "jsonwebtoken";
 import Role, { getLegacyRoles } from "../../../src/services/roles";
 
 describe("getLegacyRoles()", () => {
@@ -98,8 +99,10 @@ describe("getLegacyRoles()", () => {
     });
   });
 
-  const tokenWithRoles = (roles: string[]): any => {
+  const tokenWithRoles = (roles: string[]): Jwt => {
     return {
+      header:{alg:""},
+      signature:"",
       payload: {
         roles,
       },

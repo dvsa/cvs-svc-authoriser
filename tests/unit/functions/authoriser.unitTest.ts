@@ -1,4 +1,4 @@
-import { APIGatewayTokenAuthorizerEvent, BaseStatement, Context, MaybeStatementResource, Statement, StatementAction } from "aws-lambda";
+import { APIGatewayTokenAuthorizerEvent, Context } from "aws-lambda";
 import { StatusCodeError } from "request-promise/errors";
 import { authorizer } from "../../../src/functions/authorizer";
 import { IncomingMessage } from "http";

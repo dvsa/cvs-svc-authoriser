@@ -1,4 +1,5 @@
 import { APIGatewayAuthorizerResult, Statement } from "aws-lambda";
+import { Jwt } from "jsonwebtoken";
 import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
 import { ILogEvent } from "../models/ILogEvent";
 import { HttpVerb } from "../services/http-verbs";
@@ -63,7 +64,7 @@ const roleToStatement = (resource: string, childResource: string | null, httpVer
   return new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build();
 };
 
-export function generatePolicy(jwt: any, logEvent: ILogEvent): APIGatewayAuthorizerResult | undefined {
+export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthorizerResult | undefined {
   let statements: Statement[] = [];
   const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
@@ -77,7 +78,7 @@ export function generatePolicy(jwt: any, logEvent: ILogEvent): APIGatewayAuthori
   }
 
   return {
-    principalId: jwt.payload.sub,
+    principalId: jwt.payload.sub as string,
     policyDocument: newPolicyDocument(statements),
   };
 }

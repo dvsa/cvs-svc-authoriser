@@ -1,8 +1,9 @@
+import { Jwt, JwtPayload } from "jsonwebtoken";
 import { ILogEvent } from "../models/ILogEvent";
 
 export type Access = "read" | "write" | "view";
 
-function isOfTypeAccess(access: any): access is Access {
+function isOfTypeAccess(access: Access): boolean {
   return ["read", "write", "view"].includes(access);
 }
 
@@ -13,8 +14,8 @@ export default interface Role {
 
 const backwardsCompatibleRoleNames = ["CVSFullAccess", "CVSPsvTester", "CVSHgvTester", "CVSAdrTester", "CVSTirTester", "VTMAdmin"];
 
-export const getLegacyRoles = (token: any, logEvent: ILogEvent): Role[] => {
-  const rolesOnToken = token.payload.roles;
+export const getLegacyRoles = (token: Jwt, logEvent: ILogEvent): Role[] => {
+  const rolesOnToken = (token.payload as JwtPayload).roles;
 
   if (!rolesOnToken) {
     logEvent.roles = [];

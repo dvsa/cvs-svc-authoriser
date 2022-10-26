@@ -8,6 +8,7 @@ import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
 import { writeLogMessage } from "../common/Logger";
 import newPolicyDocument from "./newPolicyDocument";
+import { Jwt, JwtPayload } from "jsonwebtoken";
 
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
@@ -26,7 +27,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
 
   try {
     initialiseLogEvent(event);
-    const jwt: any = await getValidJwt(event.authorizationToken, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
+    const jwt = await getValidJwt(event.authorizationToken, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
 
     const policy = generateRolePolicy(jwt, logEvent) ?? (await generateFunctionalPolicy(jwt, logEvent));
 
@@ -52,8 +53,8 @@ const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
   };
 };
 
-const reportNoValidRoles = (jwt: any, event: APIGatewayTokenAuthorizerEvent, context: Context, logEvent: ILogEvent): void => {
-  const roles = jwt.payload.roles;
+const reportNoValidRoles = (jwt: Jwt, event: APIGatewayTokenAuthorizerEvent, context: Context, logEvent: ILogEvent): void => {
+  const roles = (jwt.payload as JwtPayload).roles;
   if (roles && roles.length === 0) {
     logEvent.message = JWT_MESSAGE.NO_ROLES;
   } else {
