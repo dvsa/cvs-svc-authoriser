@@ -6,8 +6,8 @@ export const checkSignature = async (encodedToken: string, decodedToken: JWT.Jwt
   const certificate = await getCertificateChain(tenantId, decodedToken.header.kid as string);
 
   JWT.verify(encodedToken, certificate, {
-    audience: clientId.split(','),
-    issuer: [`https://sts.windows.net/${tenantId}/`,`https://login.microsoftonline.com/${tenantId}/v2.0`],
+    audience: clientId.split(","),
+    issuer: [`https://sts.windows.net/${tenantId}/`, `https://login.microsoftonline.com/${tenantId}/v2.0`],
     algorithms: ["RS256"],
   });
 };

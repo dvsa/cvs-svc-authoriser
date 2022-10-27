@@ -24,7 +24,7 @@ describe("checkSignature()", () => {
 
     expect(jsonWebToken.verify).toBeCalledWith(`${header}.${payload}.${signature}`, "fake certificate", {
       audience: [DEFAULT_CLIENT_ID],
-      issuer: [`https://sts.windows.net/${DEFAULT_TENANT_ID}/`,`https://login.microsoftonline.com/${DEFAULT_TENANT_ID}/v2.0`],
+      issuer: [`https://sts.windows.net/${DEFAULT_TENANT_ID}/`, `https://login.microsoftonline.com/${DEFAULT_TENANT_ID}/v2.0`],
       algorithms: ["RS256"],
     });
   });
@@ -34,14 +34,12 @@ describe("checkSignature()", () => {
     const payload = "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJ0aWQiOiIxMjM0NTYifQ";
     const signature = "DUmbnmFG6y-AxpT578vTwVeHoT04LyAwcdhDdvxby_A";
 
-    await expect(checkSignature(`${header}.${payload}.${signature}`, jwtJson, DEFAULT_TENANT_ID, DEFAULT_CLIENT_ID + ',xxxx')).resolves.not.toThrowError();
+    await expect(checkSignature(`${header}.${payload}.${signature}`, jwtJson, DEFAULT_TENANT_ID, DEFAULT_CLIENT_ID + ",xxxx")).resolves.not.toThrowError();
 
     expect(jsonWebToken.verify).toBeCalledWith(`${header}.${payload}.${signature}`, "fake certificate", {
-      audience: [DEFAULT_CLIENT_ID,'xxxx'],
-      issuer: [`https://sts.windows.net/${DEFAULT_TENANT_ID}/`,`https://login.microsoftonline.com/${DEFAULT_TENANT_ID}/v2.0`],
+      audience: [DEFAULT_CLIENT_ID, "xxxx"],
+      issuer: [`https://sts.windows.net/${DEFAULT_TENANT_ID}/`, `https://login.microsoftonline.com/${DEFAULT_TENANT_ID}/v2.0`],
       algorithms: ["RS256"],
     });
   });
 });
-
-
