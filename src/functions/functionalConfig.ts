@@ -22,9 +22,31 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "vehicles/*",
     },
   ],
+  "TestResult.CreateContingency": [
+    {
+      verbs: ["POST", "OPTIONS"],
+      path: "test-result/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "test-types/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "test-stations/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "defects/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "reference/*",
+    },
+  ],
   "TestResult.Amend": [
     {
-      verbs: ["POST", "PUT", "OPTIONS"],
+      verbs: ["PUT", "OPTIONS"],
       path: "test-result/*",
     },
     {
