@@ -7,6 +7,7 @@
     "node": "16.*"
   },
   "scripts": {
+    "start": "sls offline start",
     "build": "node_modules/typescript/bin/tsc --rootDir ./ --outDir build --sourceMap false && npm run build:copy && npm run build:install",
     "build:copy": "cp package.json package-lock.json build && cd src && find ./**/*.yml | cpio -pdm ../build",
     "build:install": "cd build && npm install --production",
@@ -51,6 +52,10 @@
     "jest-plugin-context": "2.9.0",
     "jest-sonar-reporter": "2.0.0",
     "prettier": "2.3.2",
+    "serverless": "3.24.1",
+    "serverless-dotenv-plugin": "4.0.2",
+    "serverless-offline": "11.2.3",
+    "serverless-plugin-typescript": "2.1.4",
     "ts-jest": "28.0.7",
     "tslint": "6.1.3",
     "typescript": "4.7.4"

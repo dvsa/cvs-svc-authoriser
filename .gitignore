@@ -42,3 +42,6 @@ coverage/**
 report.json
 
 .reports/
+
+#config
+.env

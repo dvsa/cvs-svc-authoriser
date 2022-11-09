@@ -94,14 +94,32 @@ npm test
 
 This project only contains unit tests. For integration tests, see [cvs-svc-auto][cvs-svc-auto].
 
-## Run
+## Local Invocation
 
-This Lambda is an authorizer and shouldn't be directly executed.
+The [serverless-offline][serverless-offline] package is used to run the lambda locally. A test function is initialiased and protected by the lambda authoriser. Details of the configuration are in the serverless.yml file.
+Before running/debugging, copy the `.env.example` file to `.env`.
 
-For debugging purposes, available choices are:
+- `AZURE_CLIENT_ID` needs to be a list of audiences the tokens will be validated against.
+- `AZURE_TENANT_ID` needs to be the tenantId to use for the token validation.
 
-- Call the Lambda manually (it's not exposed directly via APIG) with [the right input][lambda-authorizer-input].
-- Protect something with the authorizer (e.g. an existing non-prod endpoint) and call it.
+### Running
+
+Run `npm start` to run the test function and lambda authoriser. Once running, the test function can be called using postman or something similar. An example postman collection can be found at `tests/resources/authoriser.postman_collection.json`. There are a number of variables that need population before it will work. These are the details of credentials you will want to test i.e. clientId, secret etc.
+If there is any reason the token does not allow access to the resource the reason is sent back in the response.
+
+```json
+{
+  "statusCode": 403,
+  "error": "Forbidden",
+  "message": "User is not authorized to access this resource"
+}
+```
+
+If the token does allow access, the request will be allowed through to the test function and `"Test function successfully invoked. Access was granted."` is returned in the response.
+
+### Debugging
+
+A debug configuration has been added that runs `npm start` under a debug session. Testing is performed via postman as described above.
 
 [confluence]: https://wiki.dvsacloud.uk/display/HVT/Lambda+Authoriser
 [nvm]: https://github.com/nvm-sh/nvm
@@ -117,3 +135,4 @@ For debugging purposes, available choices are:
 [fake-config]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/tests/resources/config-test.yml
 [lambda-authorizer-input]: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-input.html
 [lambda-authorizer-output]: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
+[serverless-offline]: https://www.serverless.com/plugins/serverless-offline
