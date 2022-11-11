@@ -24,7 +24,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
   ],
   "TechRecord.Archive": [
     {
-      verbs: ["POST", "OPTIONS"],
+      verbs: ["PUT", "OPTIONS"],
       path: "/vehicles/archive/*",
     },
   ],
