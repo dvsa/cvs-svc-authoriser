@@ -28,6 +28,24 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "/vehicles/archive/*",
     },
   ],
+  "TestResult.CreateDeskBased": [
+    {
+      verbs: ["POST", "OPTIONS"],
+      path: "test-result/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "test-stations/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "reference/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "test-types/*",
+    },
+  ],
   "TestResult.CreateContingency": [
     {
       verbs: ["POST", "OPTIONS"],
