@@ -78,8 +78,7 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     statements = statements.concat(items);
   }
 
-  if(!statements || statements.length === 0)
-  {
+  if (!statements || statements.length === 0) {
     return undefined;
   }
 
