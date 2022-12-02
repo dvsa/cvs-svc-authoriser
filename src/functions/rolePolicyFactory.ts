@@ -78,8 +78,8 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     statements = statements.concat(items);
   }
 
-  console.log(`statement length: ${statements ? statements.length : '-'}`);
-  console.log(`legacy roles length: ${legacyRoles ? legacyRoles.length : '-'}`);
+  console.log(`statement length: ${statements ? statements.length : "-"}`);
+  console.log(`legacy roles length: ${legacyRoles ? legacyRoles.length : "-"}`);
   console.log(`legacy policy: ${JSON.stringify(statements)}`);
 
   return {
