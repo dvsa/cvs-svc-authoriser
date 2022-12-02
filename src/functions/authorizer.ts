@@ -32,16 +32,16 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     const policy = generateRolePolicy(jwt, logEvent) ?? (await generateFunctionalPolicy(jwt, logEvent));
 
     if (policy !== undefined) {
-      console.log('final policy: ' + JSON.stringify(policy));
+      console.log("final policy: " + JSON.stringify(policy));
       return policy;
     }
 
-    console.log('no policy generated');
+    console.log("no policy generated");
     reportNoValidRoles(jwt, event, context, logEvent);
     writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
     return unauthorisedPolicy();
   } catch (error: any) {
-    console.log('Error: ' + JSON.stringify(error ?? {}));
+    console.log("Error: " + JSON.stringify(error ?? {}));
     writeLogMessage(logEvent, error);
     return unauthorisedPolicy();
   }
