@@ -21,11 +21,6 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     return self.findIndex((s) => s.Resource === item.Resource) === pos;
   });
 
-  console.log(`payload roles: ${JSON.stringify((jwt.payload as JwtPayload).roles)}`);
-  console.log(`original statements: ${JSON.stringify(statements)}`);
-  console.log(`deduperFilters: ${JSON.stringify(dedupedFilters)}`);
-  console.log(`deduperFilters length: ${dedupedFilters.length}`);
-
   if (dedupedFilters.length === 0) {
     return undefined;
   }

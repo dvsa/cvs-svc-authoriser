@@ -78,9 +78,10 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     statements = statements.concat(items);
   }
 
-  console.log(`statement length: ${statements ? statements.length : "-"}`);
-  console.log(`legacy roles length: ${legacyRoles ? legacyRoles.length : "-"}`);
-  console.log(`legacy policy: ${JSON.stringify(statements)}`);
+  if(!statements || statements.length === 0)
+  {
+    return undefined;
+  }
 
   return {
     principalId: jwt.payload.sub as string,
