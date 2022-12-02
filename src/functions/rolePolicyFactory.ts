@@ -78,6 +78,8 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     statements = statements.concat(items);
   }
 
+  console.log(`legacy policy: ${JSON.stringify(statements)}`)
+
   return {
     principalId: jwt.payload.sub as string,
     policyDocument: newPolicyDocument(statements),
