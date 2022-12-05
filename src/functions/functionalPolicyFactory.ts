@@ -17,6 +17,8 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     .map((i: IApiAccess[]) => i.map((ia) => toStatements(ia)).flat())
     .flat();
 
+  console.log("statments:", JSON.stringify(statements));
+
   const dedupedFilters = statements.filter((item: MaybeStatementResource, pos: number, self: MaybeStatementResource[]) => {
     return self.findIndex((s) => s.Resource === item.Resource) === pos;
   });

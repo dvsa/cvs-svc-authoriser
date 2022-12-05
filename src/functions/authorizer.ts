@@ -35,6 +35,8 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
       return policy;
     }
 
+    console.log("ERROR", JSON.stringify(policy));
+
     reportNoValidRoles(jwt, event, context, logEvent);
     writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
     return unauthorisedPolicy();
