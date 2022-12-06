@@ -23,6 +23,8 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     return self.findIndex((s) => s.Resource === item.Resource) === pos;
   });
 
+  console.log("deduped statments:", JSON.stringify(dedupedFilters));
+
   if (dedupedFilters.length === 0) {
     return undefined;
   }
