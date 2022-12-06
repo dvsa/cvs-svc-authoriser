@@ -45,6 +45,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "test-types",
     },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "test-types/*",
+    },
   ],
   "TestResult.CreateContingency": [
     {
@@ -54,6 +58,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
     {
       verbs: ["GET", "OPTIONS"],
       path: "test-types",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "test-types/*",
     },
     {
       verbs: ["GET", "OPTIONS"],
@@ -79,6 +87,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
     },
     {
       verbs: ["GET", "OPTIONS"],
+      path: "test-types/*",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
       path: "test-stations/*",
     },
     {
@@ -98,6 +110,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
     {
       verbs: ["GET", "OPTIONS"],
       path: "test-types",
+    },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "test-types/*",
     },
     {
       verbs: ["GET", "OPTIONS"],
