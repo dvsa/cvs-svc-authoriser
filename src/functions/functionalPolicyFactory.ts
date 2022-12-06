@@ -17,21 +17,17 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     .map((i: IApiAccess[]) => i.map((ia) => toStatements(ia)).flat())
     .flat();
 
-  console.log("statments:", JSON.stringify(statements));
-
-  const dedupedFilters = statements.filter((item: MaybeStatementResource, pos: number, self: MaybeStatementResource[]) => {
+  const nonDuplicatedStatements = statements.filter((item: MaybeStatementResource, pos: number, self: MaybeStatementResource[]) => {
     return self.findIndex((s) => s.Resource === item.Resource) === pos;
   });
 
-  console.log("deduped statments:", JSON.stringify(dedupedFilters));
-
-  if (dedupedFilters.length === 0) {
+  if (nonDuplicatedStatements.length === 0) {
     return undefined;
   }
 
   const returnValue = {
     principalId: jwt.payload.sub as string,
-    policyDocument: newPolicyDocument(dedupedFilters),
+    policyDocument: newPolicyDocument(nonDuplicatedStatements),
   };
 
   return returnValue;

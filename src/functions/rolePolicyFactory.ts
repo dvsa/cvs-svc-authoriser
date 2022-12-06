@@ -78,8 +78,6 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     statements = statements.concat(items);
   }
 
-  console.log("legacy statements", JSON.stringify(statements));
-
   if (!statements || statements.length === 0) {
     return undefined;
   }
