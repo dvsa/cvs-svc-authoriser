@@ -121,7 +121,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
     },
     {
       verbs: ["GET", "OPTIONS"],
-      path: "v1/document-retrieval/*",
+      path: "v1/document-retrieval",
     },
   ],
 };
