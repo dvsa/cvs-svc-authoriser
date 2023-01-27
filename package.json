@@ -20,7 +20,7 @@
     "security-checks": "git secrets --scan",
     "lint": "tslint src/**/*.ts tests/**/*.ts",
     "format": "prettier --write .",
-    "sonar-scanner": "sonar-scanner",
+    "sonar-scanner": "npm run test && sonar-scanner",
     "audit": "npm audit --prod",
     "tools-setup": "echo 'Nothing to do'"
   },
@@ -62,7 +62,7 @@
     "typescript": "4.7.4"
   },
   "jestSonar": {
-    "reportPath": ".reports",
+    "reportPath": "coverage",
     "reportFile": "test-report.xml",
     "indent": 4
   },
