@@ -138,4 +138,16 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "v1/document-retrieval",
     },
   ],
+  "ReferenceData.View": [
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "reference/*",
+    }
+  ],
+  "ReferenceData.Amend": [
+    {
+      verbs: ["GET", "OPTIONS", "PUT", "POST", "DELETE"],
+      path: "reference/*",
+    }
+  ],
 };
