@@ -23,7 +23,7 @@
     "format": "prettier --write .",
     "sonar-scanner": "sonar-scanner",
     "audit": "npm audit --prod",
-    "prepare": "npm husky install",
+    "prepare": "husky install",
     "tools-setup": "echo 'Nothing to do'"
   },
   "author": "",
