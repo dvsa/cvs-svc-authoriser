@@ -1,5 +1,4 @@
 import { APIGatewayTokenAuthorizerEvent, Context } from "aws-lambda";
-// import { StatusCodeError } from "request-promise/errors";
 import { authorizer } from "../../../src/functions/authorizer";
 import { IncomingMessage } from "http";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
