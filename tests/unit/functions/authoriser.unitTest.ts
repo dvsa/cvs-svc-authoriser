@@ -1,5 +1,4 @@
 import { APIGatewayTokenAuthorizerEvent, Context } from "aws-lambda";
-import { StatusCodeError } from "request-promise/errors";
 import { authorizer } from "../../../src/functions/authorizer";
 import { IncomingMessage } from "http";
 import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
@@ -21,7 +20,7 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should fail on non-2xx HTTP status", async () => {
-    (getValidJwt as jest.Mock) = jest.fn().mockRejectedValue(new StatusCodeError(418, "I'm a teapot", { url: "http://example.org" }, {} as IncomingMessage));
+    (getValidJwt as jest.Mock) = jest.fn().mockRejectedValue({ statusCode: 418, body: "I'm a teapot", options: { url: "http://example.org" }, response: {} as IncomingMessage});
 
     await expectUnauthorised(event);
   });
