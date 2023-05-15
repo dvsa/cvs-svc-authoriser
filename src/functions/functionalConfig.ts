@@ -37,8 +37,8 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
     },
     {
       verbs: ["GET", "OPTIONS"],
-      path: "v2/vehicles/{searchIdentifier}/tech-records/*"
-    }
+      path: "v2/vehicles/*",
+    },
   ],
   "TechRecord.Archive": [
     {
@@ -146,12 +146,12 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
     {
       verbs: ["GET", "OPTIONS"],
       path: "reference/*",
-    }
+    },
   ],
   "ReferenceData.Amend": [
     {
       verbs: ["GET", "OPTIONS", "PUT", "POST", "DELETE"],
       path: "reference/*",
-    }
+    },
   ],
 };
