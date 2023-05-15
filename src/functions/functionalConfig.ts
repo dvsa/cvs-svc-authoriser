@@ -35,6 +35,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "vehicles/*",
     },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "v2/vehicles/{searchIdentifier}/tech-records/"
+    }
   ],
   "TechRecord.Archive": [
     {
