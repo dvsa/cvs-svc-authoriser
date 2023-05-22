@@ -20,7 +20,7 @@ describe("authorizer() unit tests", () => {
   });
 
   it("should fail on non-2xx HTTP status", async () => {
-    (getValidJwt as jest.Mock) = jest.fn().mockRejectedValue({ statusCode: 418, body: "I'm a teapot", options: { url: "http://example.org" }, response: {} as IncomingMessage});
+    (getValidJwt as jest.Mock) = jest.fn().mockRejectedValue({ statusCode: 418, body: "I'm a teapot", options: { url: "http://example.org" }, response: {} as IncomingMessage });
 
     await expectUnauthorised(event);
   });
@@ -107,7 +107,7 @@ describe("authorizer() unit tests", () => {
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
 
-    expect(returnValue.policyDocument.Statement.length).toEqual(2);
+    expect(returnValue.policyDocument.Statement.length).toEqual(4);
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
@@ -122,7 +122,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(6);
+    expect(returnValue.policyDocument.Statement.length).toEqual(8);
   });
 
   it("should return an accurate policy based on functional roles", async () => {
@@ -131,7 +131,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(6);
+    expect(returnValue.policyDocument.Statement.length).toEqual(8);
 
     const post: { Action: string; Effect: string; Resource: string } = returnValue.policyDocument.Statement[0] as unknown as { Action: string; Effect: string; Resource: string };
     expect(post.Effect).toEqual("Allow");
