@@ -21,7 +21,7 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
   const logEvent: ILogEvent = {};
 
   if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID) {
-    writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ID_SETUP);
+    writeLogMessage(logEvent, event.authorizationToken, JWT_MESSAGE.INVALID_ID_SETUP);
     return unauthorisedPolicy();
   }
 
@@ -36,10 +36,10 @@ export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context:
     }
 
     reportNoValidRoles(jwt, event, context, logEvent);
-    writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ROLES);
+    writeLogMessage(logEvent, event.authorizationToken, JWT_MESSAGE.INVALID_ROLES);
     return unauthorisedPolicy();
   } catch (error: any) {
-    writeLogMessage(logEvent, error);
+    writeLogMessage(logEvent, event.authorizationToken, error);
     return unauthorisedPolicy();
   }
 };
