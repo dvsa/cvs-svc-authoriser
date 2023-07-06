@@ -11,7 +11,7 @@ describe("test writeLogMessage method", () => {
 
   context("when only the log event is passed in", () => {
     it("should return no errors", () => {
-      const returnValue: ILogEvent = writeLogMessage(successLogEvent, null);
+      const returnValue: ILogEvent = writeLogMessage(successLogEvent, "mock-jwt", null);
 
       expect(returnValue.statusCode).toBe(200);
     });
@@ -20,41 +20,49 @@ describe("test writeLogMessage method", () => {
   context("when log event and error are passed in", () => {
     it("should log TokenExpiredError", () => {
       const error: ILogError = { name: "TokenExpiredError", message: "Error" };
+      console.log = jest.fn();
 
       logError.name = "TokenExpiredError";
-      const returnValue: ILogEvent = writeLogMessage(logErrorEvent, error);
+      const returnValue: ILogEvent = writeLogMessage(logErrorEvent,"mock-jwt", error);
 
       expect(returnValue.error?.name).toBe("TokenExpiredError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-07] Error at undefined");
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
 
     it("should log NotBeforeError", () => {
       const error: ILogError = { name: "NotBeforeError" };
+      console.log = jest.fn();
 
       logError.name = "NotBeforeError";
-      const returnValue: ILogEvent = writeLogMessage(logErrorEvent, error);
+      const returnValue: ILogEvent = writeLogMessage(logErrorEvent,"mock-jwt", error);
 
       expect(returnValue.error?.name).toBe("NotBeforeError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-08] undefined until undefined");
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
 
     it("should log JsonWebTokenError", () => {
       const error: ILogError = { name: "JsonWebTokenError", message: "test" };
+      console.log = jest.fn();
 
       logError.name = "JsonWebTokenError";
-      const returnValue: ILogEvent = writeLogMessage(logErrorEvent, error);
+      const returnValue: ILogEvent = writeLogMessage(logErrorEvent,"mock-jwt", error);
 
       expect(returnValue.error?.name).toBe("JsonWebTokenError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-09] test");
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
 
     it("should log the default error", () => {
       const error: ILogError = { name: "Error", message: "Error" };
+      console.log = jest.fn();
 
-      const returnValue: ILogEvent = writeLogMessage(logErrorEvent, error);
+      const returnValue: ILogEvent = writeLogMessage(logErrorEvent,"mock-jwt", error);
 
       expect(returnValue.error?.name).toBe("Error");
       expect(returnValue.error?.message).toBe("Error");
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
   });
 });
