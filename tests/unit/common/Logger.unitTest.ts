@@ -27,7 +27,7 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("TokenExpiredError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-07] Error at undefined");
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('mock-jwt'));
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
 
     it("should log NotBeforeError", () => {
@@ -39,7 +39,7 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("NotBeforeError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-08] undefined until undefined");
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('mock-jwt'));
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
 
     it("should log JsonWebTokenError", () => {
@@ -51,7 +51,7 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("JsonWebTokenError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-09] test");
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('mock-jwt'));
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
 
     it("should log the default error", () => {
@@ -62,7 +62,7 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("Error");
       expect(returnValue.error?.message).toBe("Error");
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('mock-jwt'));
+      expect(returnValue.error?.token).toBe("mock-jwt");
     });
   });
 });

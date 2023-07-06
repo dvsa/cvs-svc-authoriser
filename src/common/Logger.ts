@@ -32,8 +32,8 @@ export const writeLogMessage = (log: ILogEvent, jwt: string, error?: any) => {
       }
     }
     log.error = logError;
+    log.error.token = jwt;
     console.error(log);
-    console.log(jwt);
   }
   return log;
 };
