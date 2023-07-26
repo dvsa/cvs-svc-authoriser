@@ -15,6 +15,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "reference/*",
     },
+    {
+      verbs: ["POST", "PUT", "OPTIONS"],
+      path: "v3/technical-records/*",
+    },
   ],
   "TechRecord.Create": [
     {
@@ -32,6 +36,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
     {
       verbs: ["GET", "OPTIONS"],
       path: "reference/*",
+    },
+    {
+      verbs: ["POST"],
+      path: "v3/technical-records/*",
     },
   ],
   "TechRecord.View": [
