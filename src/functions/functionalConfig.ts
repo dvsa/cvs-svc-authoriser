@@ -38,7 +38,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "reference/*",
     },
     {
-      verbs: ["POST", "OPTIONS"],
+      verbs: ["POST", "PUT", "PATCH", "OPTIONS"],
       path: "v3/technical-records/*",
     },
   ],
