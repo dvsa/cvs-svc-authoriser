@@ -41,6 +41,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["POST", "OPTIONS"],
       path: "v3/technical-records/*",
     },
+    {
+      verbs: ["POST"],
+      path: "v3/technical-records",
+    },
   ],
   "TechRecord.View": [
     {
