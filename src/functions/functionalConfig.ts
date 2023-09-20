@@ -66,6 +66,12 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "vehicles/archive/*",
     },
   ],
+  "TechRecord.Unarchive": [
+    {
+      verbs: ["POST", "OPTIONS"],
+      path: "vehicles/unarchive/*",
+    },
+  ],
   "TestResult.CreateDeskBased": [
     {
       verbs: ["POST", "OPTIONS"],
