@@ -2,7 +2,7 @@ import { ILogEvent } from "../models/ILogEvent";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogError } from "../models/ILogError";
 
-export const writeLogMessage = (log: ILogEvent, jwt: string, error?: any) => {
+export const writeLogMessage = (log: ILogEvent, error?: any) => {
   if (!error) {
     log.statusCode = 200;
     console.log(log);
@@ -32,7 +32,8 @@ export const writeLogMessage = (log: ILogEvent, jwt: string, error?: any) => {
       }
     }
     log.error = logError;
-    log.error.token = jwt;
+    log.error.username = log.email;
+    log.error.roles = log.roles;
     console.error(log);
   }
   return log;
