@@ -3,13 +3,12 @@ import { ILogEvent } from "../../../src/models/ILogEvent";
 import errorLogEvent from "../../resources/errorLogEvent.json";
 import { writeLogMessage } from "../../../src/common/Logger";
 import successLogEvent from "../../resources/successLogEvent.json";
-import jwtJson from "../../resources/jwt.json";
+import Role from "../../../src/services/roles";
 
 describe("test writeLogMessage method", () => {
   const logError: ILogError = {};
   const logErrorEvent: ILogEvent = errorLogEvent;
-  const jwtJsonClone = JSON.parse(JSON.stringify(jwtJson));
-  logErrorEvent.roles = jwtJsonClone.payload.roles;
+  logErrorEvent.roles = [{name: "test", access: "read"}] as Role[];
 
   context("when only the log event is passed in", () => {
     it("should return no errors", () => {
