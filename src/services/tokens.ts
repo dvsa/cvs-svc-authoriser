@@ -19,8 +19,6 @@ export const getValidJwt = async (authorizationToken: string, logEvent: ILogEven
     throw new Error(JWT_MESSAGE.DECODE_FAILED);
   }
 
-  await checkSignature(authorizationToken, decoded, tenantId, clientId);
-
   let username;
   const payload = decoded.payload as CVSJWTPayload;
 
@@ -36,6 +34,9 @@ export const getValidJwt = async (authorizationToken: string, logEvent: ILogEven
 
   logEvent.email = username;
   logEvent.tokenExpiry = new Date((payload.exp as number) * 1000).toISOString();
+
+  await checkSignature(authorizationToken, decoded, tenantId, clientId);
+  
   return decoded;
 };
 
