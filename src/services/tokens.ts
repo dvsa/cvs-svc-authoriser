@@ -33,10 +33,11 @@ export const getValidJwt = async (authorizationToken: string, logEvent: ILogEven
   }
 
   logEvent.email = username;
+  logEvent.roles = (decoded.payload as JwtPayload).roles;
   logEvent.tokenExpiry = new Date((payload.exp as number) * 1000).toISOString();
 
   await checkSignature(authorizationToken, decoded, tenantId, clientId);
-  
+
   return decoded;
 };
 
