@@ -28,8 +28,8 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("TokenExpiredError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-07] Error at undefined");
-      expect(returnValue.error?.username).toBe(logErrorEvent.email);
-      expect(returnValue.error?.roles).toBe(logErrorEvent.roles);
+      expect(returnValue.email).toBe(logErrorEvent.email);
+      expect(returnValue.roles).toBe(logErrorEvent.roles);
     });
     });
 
@@ -42,8 +42,8 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("NotBeforeError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-08] undefined until undefined");
-      expect(returnValue.error?.username).toBe(logErrorEvent.email);
-      expect(returnValue.error?.roles).toBe(logErrorEvent.roles);
+      expect(returnValue.email).toBe(logErrorEvent.email);
+      expect(returnValue.roles).toBe(logErrorEvent.roles);
 
     });
 
@@ -56,8 +56,8 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("JsonWebTokenError");
       expect(returnValue.error?.message).toBe("[JWT-ERROR-09] test");
-      expect(returnValue.error?.username).toBe(logErrorEvent.email);
-      expect(returnValue.error?.roles).toBe(logErrorEvent.roles);
+      expect(returnValue.email).toBe(logErrorEvent.email);
+      expect(returnValue.roles).toBe(logErrorEvent.roles);
 
     });
 
@@ -69,7 +69,7 @@ describe("test writeLogMessage method", () => {
 
       expect(returnValue.error?.name).toBe("Error");
       expect(returnValue.error?.message).toBe("Error");
-      expect(returnValue.error?.username).toBe(logErrorEvent.email);
-      expect(returnValue.error?.roles).toBe(logErrorEvent.roles);
+      expect(returnValue.email).toBe(logErrorEvent.email);
+      expect(returnValue.roles).toBe(logErrorEvent.roles);
     });
 });

@@ -32,8 +32,6 @@ export const writeLogMessage = (log: ILogEvent, error?: any) => {
       }
     }
     log.error = logError;
-    log.error.username = log.email;
-    log.error.roles = log.roles;
     console.error(log);
   }
   return log;
