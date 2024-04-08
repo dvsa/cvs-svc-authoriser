@@ -1,5 +1,5 @@
 import { APIGatewayAuthorizerResult, Statement } from "aws-lambda";
-import { Jwt, JwtPayload } from "jsonwebtoken";
+import { Jwt } from "jsonwebtoken";
 import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
 import { ILogEvent } from "../models/ILogEvent";
 import { HttpVerb } from "../services/http-verbs";
