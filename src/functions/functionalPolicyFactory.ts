@@ -1,10 +1,9 @@
-import { APIGatewayAuthorizerResult, MaybeStatementResource, Statement, StatementResource } from "aws-lambda";
+import { APIGatewayAuthorizerResult, MaybeStatementResource, Statement } from "aws-lambda";
 import newPolicyDocument from "./newPolicyDocument";
 import { ILogEvent } from "../models/ILogEvent";
 import StatementBuilder from "../services/StatementBuilder";
 import { functionConfig, IApiAccess } from "./functionalConfig";
 import { Jwt, JwtPayload } from "jsonwebtoken";
-import { ResourceStatement } from "aws-sdk/clients/ec2";
 
 function toStatements(access: IApiAccess): Statement[] {
   return access.verbs.map((v) => new StatementBuilder().setEffect("Allow").setHttpVerb(v).setResource(access.path).build());
