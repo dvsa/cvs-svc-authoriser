@@ -13,7 +13,7 @@
     "build:copy": "find src -type f \\( -name \"*.yml\" -or -name \"*.json\" \\) | cpio -pdm .build && find tests -type f \\( -name \"*.yml\" -or -name \"*.json\" \\)  | cpio -pdm .build",
     "test": "npm run test:unit -- --runInBand --coverage",
     "test:unit": "BRANCH=local jest --testMatch=\"**/*.unitTest.ts\"",
-    "package": "ts-node package.ts && cd ${ZIP_NAME}; zip -r ../${ZIP_NAME}.zip *",
+    "package": "ts-node package.ts && cd ${ZIP_NAME:-'authoriser'}; zip -r ../${ZIP_NAME:-'authoriser'}.zip *",
     "test-i": "echo \"No Current Int Tests\"",
     "commit-msg": "commitlint --edit",
     "pre-commit": "npm run audit && npm run lint && npm run format",
