@@ -80,17 +80,20 @@ describe("getValidJwt()", () => {
 
   context("when preferred_username is present in the token", () => {
     it("should set the email in the log event to preferred_username", async () => {
-      const jwt = require('jsonwebtoken');
-      const token = jwt.sign({
-        "sub": "1234567890",
-        "name": "John Doe",
-        "iat": 1516239022,
-        "tid": "123456",
-        "exp": 631005334,
-        "preferred_username": "test_username"
-      }, "testSignature");
+      const jwt = require("jsonwebtoken");
+      const token = jwt.sign(
+        {
+          sub: "1234567890",
+          name: "John Doe",
+          iat: 1516239022,
+          tid: "123456",
+          exp: 631005334,
+          preferred_username: "test_username",
+        },
+        "testSignature"
+      );
 
-      const logEvent: ILogEvent = {}
+      const logEvent: ILogEvent = {};
 
       await getValidJwt(`Bearer ${token}`, logEvent, DEFAULT_TENANT_ID, DEFAULT_CLIENT_ID);
 
@@ -100,18 +103,21 @@ describe("getValidJwt()", () => {
 
   context("when preferred_username and unique_name are present in the token", () => {
     it("should set the email in the log event to preferred_username", async () => {
-      const jwt = require('jsonwebtoken');
-      const token = jwt.sign({
-        "sub": "1234567890",
-        "name": "John Doe",
-        "iat": 1516239022,
-        "tid": "123456",
-        "exp": 631005334,
-        "preferred_username": "test_username",
-        "unique_name": "test_unique_name"
-      }, "testSignature");
+      const jwt = require("jsonwebtoken");
+      const token = jwt.sign(
+        {
+          sub: "1234567890",
+          name: "John Doe",
+          iat: 1516239022,
+          tid: "123456",
+          exp: 631005334,
+          preferred_username: "test_username",
+          unique_name: "test_unique_name",
+        },
+        "testSignature"
+      );
 
-      const logEvent: ILogEvent = {}
+      const logEvent: ILogEvent = {};
 
       await getValidJwt(`Bearer ${token}`, logEvent, DEFAULT_TENANT_ID, DEFAULT_CLIENT_ID);
 
@@ -121,17 +127,20 @@ describe("getValidJwt()", () => {
 
   context("when unique_name is present in the token without preferred_username", () => {
     it("should set the email in the log event to unique_name", async () => {
-      const jwt = require('jsonwebtoken');
-      const token = jwt.sign({
-        "sub": "1234567890",
-        "name": "John Doe",
-        "iat": 1516239022,
-        "tid": "123456",
-        "exp": 631005334,
-        "unique_name": "test_unique_name"
-      }, "testSignature");
+      const jwt = require("jsonwebtoken");
+      const token = jwt.sign(
+        {
+          sub: "1234567890",
+          name: "John Doe",
+          iat: 1516239022,
+          tid: "123456",
+          exp: 631005334,
+          unique_name: "test_unique_name",
+        },
+        "testSignature"
+      );
 
-      const logEvent: ILogEvent = {}
+      const logEvent: ILogEvent = {};
 
       await getValidJwt(`Bearer ${token}`, logEvent, DEFAULT_TENANT_ID, DEFAULT_CLIENT_ID);
 
