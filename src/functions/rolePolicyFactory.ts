@@ -74,8 +74,8 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
     return undefined;
   }
 
+  console.log('Role to statements');
   for (const role of legacyRoles) {
-    console.log('Role to statements');
     const items = roleToStatements(role);
     statements = statements.concat(items);
   }
