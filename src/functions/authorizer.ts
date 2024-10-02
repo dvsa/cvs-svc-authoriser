@@ -20,18 +20,25 @@ import { Jwt, JwtPayload } from "jsonwebtoken";
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   const logEvent: ILogEvent = {};
 
+  console.log('Starting authoriser ...');
+
   if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID) {
+    console.log('No Azure Tenant ID or Client ID - returning unauthorised policy');
     writeLogMessage(logEvent, JWT_MESSAGE.INVALID_ID_SETUP);
     return unauthorisedPolicy();
   }
 
   try {
+    console.log('Initialising log event ...');
     initialiseLogEvent(event);
+    console.log('Getting valid JWT ...');
     const jwt = await getValidJwt(event.authorizationToken, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
 
+    console.log('Generating policy ...');
     const policy = generateRolePolicy(jwt, logEvent) ?? generateFunctionalPolicy(jwt, logEvent);
 
     if (policy !== undefined) {
+      console.log('Returning policy ...');
       return policy;
     }
 

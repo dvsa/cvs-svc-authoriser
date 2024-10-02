@@ -70,15 +70,18 @@ export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthori
   const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
 
   if (!legacyRoles || legacyRoles.length === 0) {
+    console.log('No valid roles found');
     return undefined;
   }
 
   for (const role of legacyRoles) {
+    console.log('Role to statements');
     const items = roleToStatements(role);
     statements = statements.concat(items);
   }
 
   if (!statements || statements.length === 0) {
+    console.log('No valid statements found');
     return undefined;
   }
 
