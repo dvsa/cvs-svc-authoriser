@@ -32,10 +32,10 @@ export const getValidJwt = async (authorizationToken: string, logEvent: ILogEven
     username = "No data available in token";
   } else {
     if (payload.preferred_username) {
-      console.log('Using preferred username ...');
+      console.log(`Using preferred username: ${payload.preferred_username}`);
       username = payload.preferred_username;
     } else {
-      console.log('Using unique name ...');
+      console.log(`Using unique name: ${payload.unique_name}`);
       username = payload.unique_name;
     }
   }
