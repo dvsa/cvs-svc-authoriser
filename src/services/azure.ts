@@ -14,8 +14,12 @@ export const getCertificateChain = async (tenantId: string, keyId: string): Prom
 };
 
 const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
-  console.log('Retrieving keys ...');
+  const startTime = Date.now();
+  console.log(`Retrieving keys at ${startTime} ... `);
   const response = await axios.get(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
+  const endTime = Date.now();
+  console.log(`Response received at ${endTime} ...`);
+  console.log(`Time taken: ${endTime - startTime} ms`);
 
   const map: Map<string, string> = new Map();
 
