@@ -23,7 +23,11 @@
   // Configure tool-specific properties.
   "customizations": {
     "vscode": {
-      "extensions": ["eamodio.gitlens", "dbaeumer.vscode-eslint", "EditorConfig.EditorConfig"]
+      "extensions": [
+        "eamodio.gitlens",
+        "dbaeumer.vscode-eslint",
+        "EditorConfig.EditorConfig"
+      ]
     }
   }
 

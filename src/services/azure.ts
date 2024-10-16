@@ -1,4 +1,3 @@
-import axios from "axios";
 import { KeyResponse } from "../models/KeyResponse";
 
 export const getCertificateChain = async (tenantId: string, keyId: string): Promise<string> => {
@@ -14,11 +13,11 @@ export const getCertificateChain = async (tenantId: string, keyId: string): Prom
 };
 
 const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
-  const response = await axios.get(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
+  const response = await fetchKeys(tenantId);
 
   const map: Map<string, string> = new Map();
 
-  const resp: KeyResponse = response.data;
+  const resp: KeyResponse = await response.json();
 
   for (const key of resp.keys) {
     const keyId = key.kid;
@@ -27,4 +26,8 @@ const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
     map.set(keyId, certificateChain);
   }
   return map;
+};
+
+export const fetchKeys = (tenantId: string) => {
+  return fetch(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
 };
