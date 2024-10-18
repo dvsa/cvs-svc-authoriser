@@ -6,7 +6,7 @@ import { generatePolicy as generateFunctionalPolicy } from "./functionalPolicyFa
 import { getValidJwt } from "../services/tokens";
 import { JWT_MESSAGE } from "../models/enums";
 import { ILogEvent } from "../models/ILogEvent";
-import { writeLogMessage } from "../common/Logger";
+import { envLogger, LogLevel, writeLogMessage } from "../common/Logger";
 import newPolicyDocument from "./newPolicyDocument";
 import { Jwt, JwtPayload } from "jsonwebtoken";
 
@@ -20,25 +20,35 @@ import { Jwt, JwtPayload } from "jsonwebtoken";
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   const logEvent: ILogEvent = {};
 
+  envLogger(LogLevel.DEBUG, "Invoked authoriser");
+
   if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID) {
     writeLogMessage(event, logEvent, JWT_MESSAGE.INVALID_ID_SETUP);
     return unauthorisedPolicy();
   }
 
+  envLogger(LogLevel.DEBUG, "AZURE_TENANT_ID and AZURE_CLIENT_ID are set");
+
   try {
     initialiseLogEvent(event);
+
+    envLogger(LogLevel.INFO, "Getting valid JWT");
     const jwt = await getValidJwt(event.authorizationToken, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
 
+    envLogger(LogLevel.INFO, "Generating role policy");
     const policy = generateRolePolicy(jwt, logEvent) ?? generateFunctionalPolicy(jwt, logEvent);
 
     if (policy !== undefined) {
+      envLogger(LogLevel.INFO, "Role policy generated");
       return policy;
     }
 
     reportNoValidRoles(jwt, event, context, logEvent);
     writeLogMessage(event, logEvent, JWT_MESSAGE.INVALID_ROLES);
+
     return unauthorisedPolicy();
   } catch (error: any) {
+    envLogger(LogLevel.ERROR, "Catch - Error occurred", error);
     writeLogMessage(event, logEvent, error);
     return unauthorisedPolicy();
   }
@@ -67,6 +77,8 @@ const reportNoValidRoles = (jwt: Jwt, event: APIGatewayTokenAuthorizerEvent, con
  * @param event
  */
 const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent): ILogEvent => {
+  envLogger(LogLevel.DEBUG, "Init log event");
+
   return {
     requestUrl: event.methodArn,
     timeOfRequest: new Date().toISOString(),
