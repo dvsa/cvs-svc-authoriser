@@ -20,26 +20,42 @@ import { Jwt, JwtPayload } from "jsonwebtoken";
 export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   const logEvent: ILogEvent = {};
 
+  console.log("Invoked authoriser");
+
   if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID) {
     writeLogMessage(event, logEvent, JWT_MESSAGE.INVALID_ID_SETUP);
+    console.error("Missing AZURE_TENANT_ID or AZURE_CLIENT_ID");
     return unauthorisedPolicy();
   }
 
+  console.log("AZURE_TENANT_ID and AZURE_CLIENT_ID are set");
+
   try {
+    console.log("Init log event");
+
     initialiseLogEvent(event);
+
+    console.log("Getting valid JWT");
     const jwt = await getValidJwt(event.authorizationToken, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
 
+    console.log("Generating role policy");
     const policy = generateRolePolicy(jwt, logEvent) ?? generateFunctionalPolicy(jwt, logEvent);
 
     if (policy !== undefined) {
+      console.log("Role policy generated");
       return policy;
     }
 
+    console.warn("Reporting no valid roles");
     reportNoValidRoles(jwt, event, context, logEvent);
     writeLogMessage(event, logEvent, JWT_MESSAGE.INVALID_ROLES);
+
+    console.warn("TRY - Returning unauth policy");
     return unauthorisedPolicy();
   } catch (error: any) {
+    console.error("Catch - Error occurred", error);
     writeLogMessage(event, logEvent, error);
+    console.error("Catch - Returning unauth policy");
     return unauthorisedPolicy();
   }
 };

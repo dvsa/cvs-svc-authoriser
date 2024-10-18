@@ -3,6 +3,8 @@ import { KeyResponse } from "../models/KeyResponse";
 export const getCertificateChain = async (tenantId: string, keyId: string): Promise<string> => {
   const keys: Map<string, string> = await getKeys(tenantId);
 
+  console.log("Keys fetched");
+
   const certificateChain = keys.get(keyId);
 
   if (!certificateChain) {
@@ -29,5 +31,6 @@ const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
 };
 
 export const fetchKeys = (tenantId: string) => {
+  console.log("Fetching keys");
   return fetch(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
 };
