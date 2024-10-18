@@ -8,6 +8,7 @@ export const getCertificateChain = async (tenantId: string, keyId: string): Prom
   console.log(`Cache ${cacheKeys ? 'hit' : 'not hit'}`);
 
   const keys: Map<string, string> = cacheKeys ?? await getKeys(tenantId);
+  console.log("Public Keys Read");
 
   if (!cache.has(tenantId)) {
     cache.set(tenantId, keys);
@@ -35,10 +36,12 @@ const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
 
     map.set(keyId, certificateChain);
   }
+
+  console.log("Key Map Created");
   return map;
 };
 
 export const fetchKeys = (tenantId: string) => {
-  console.log("Fetching keys");
+  console.log("Fetching keys from https://login.microsoftonline.com/${tenantId}/discovery/keys");
   return fetch(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
 };
