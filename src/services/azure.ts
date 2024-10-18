@@ -1,9 +1,17 @@
 import { KeyResponse } from "../models/KeyResponse";
 
-export const getCertificateChain = async (tenantId: string, keyId: string): Promise<string> => {
-  const keys: Map<string, string> = await getKeys(tenantId);
+const cache: Map<string, Map<string, string>> = new Map();
 
-  console.log("Keys fetched");
+export const getCertificateChain = async (tenantId: string, keyId: string): Promise<string> => {
+  const cacheKeys = cache.get(tenantId);
+
+  console.log(`Cache ${cacheKeys ? 'hit' : 'not hit'}`);
+
+  const keys: Map<string, string> = cacheKeys ?? await getKeys(tenantId);
+
+  if (!cache.has(tenantId)) {
+    cache.set(tenantId, keys);
+  }
 
   const certificateChain = keys.get(keyId);
 
