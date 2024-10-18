@@ -32,6 +32,6 @@ describe("getCertificateChain()", () => {
   it("should throw an error if no key matches the given key ID", async (): Promise<void> => {
     fetchSpy("somethingElse", "mySuperSecurePublicKey");
 
-    await expect(azure.getCertificateChain("tenantId", "keyToTheKingdom")).rejects.toThrow("no public key");
+    await expect(azure.getCertificateChain("tenantId", "otherKeyToTheKingdom")).rejects.toThrow("no public key");
   });
 });

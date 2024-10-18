@@ -42,3 +42,32 @@ export const writeLogMessage = (event: APIGatewayTokenAuthorizerEvent, log: ILog
   }
   return log;
 };
+
+export enum LogLevel {
+  DEBUG = "DEBUG",
+  INFO = "INFO",
+  WARN = "WARN",
+  ERROR = "ERROR",
+}
+
+export const envLogger = (level: LogLevel, ...messages: string[]) => {
+  if (process.env.DEBUG === "true") {
+    switch (level) {
+      case LogLevel.DEBUG:
+        console.debug(messages);
+        break;
+      case LogLevel.INFO:
+        console.info(messages);
+        break;
+      case LogLevel.WARN:
+        console.warn(messages);
+        break;
+      case LogLevel.ERROR:
+        console.error(messages);
+        break;
+      default:
+        console.log(messages);
+        return;
+    }
+  }
+};
