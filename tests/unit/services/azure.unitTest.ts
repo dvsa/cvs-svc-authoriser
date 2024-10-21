@@ -32,6 +32,17 @@ describe("getCertificateChain()", () => {
   it("should throw an error if no key matches the given key ID", async (): Promise<void> => {
     fetchSpy("somethingElse", "mySuperSecurePublicKey");
 
-    await expect(azure.getCertificateChain("tenantId", "keyToTheKingdom")).rejects.toThrow("no public key");
+    await expect(azure.getCertificateChain("tenantId", "otherKeyToTheKingdom")).rejects.toThrow("no public key");
+  });
+
+  // simulate multiple calls to the function
+  [1, 2, 3].forEach(() => {
+    it(`should call fetchKeys only once and then hit the cache`, async (): Promise<void> => {
+      const publicKey = "mySuperSecurePublicKey";
+      fetchSpy("keyToTheKingdom", publicKey);
+
+      await azure.getCertificateChain("tenantId", "keyToTheKingdom");
+      expect(azure.fetchKeys).toHaveBeenCalledTimes(1);
+    });
   });
 });
