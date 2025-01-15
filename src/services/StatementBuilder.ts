@@ -127,7 +127,7 @@ export default class StatementBuilder {
 
     return {
       Action: this.action as string,
-      Effect: this.effect as string,
+      Effect: this.effect,
       Resource: resourceArn,
     };
   }
