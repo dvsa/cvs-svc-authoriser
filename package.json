@@ -46,7 +46,7 @@
     "prettier": "2.8.7",
     "serverless": "^3.39.0",
     "serverless-dotenv-plugin": "6.0.0",
-    "serverless-offline": "^13.8.0",
+    "serverless-offline": "^13.9.0",
     "serverless-plugin-typescript": "^2.1.5",
     "ts-jest": "^29.2.5",
     "tslint": "6.1.3",
