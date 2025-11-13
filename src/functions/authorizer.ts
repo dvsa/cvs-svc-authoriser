@@ -11,6 +11,7 @@ import newPolicyDocument from "./newPolicyDocument";
 import type { Jwt, JwtPayload } from "jsonwebtoken";
 import { generateVersionPolicy } from "./versionPolicyFactory";
 import { isVersionEndpointRequest } from "../services/version-endpoint-request-checker";
+import { generateMediaPolicy } from "./mediaPolicyFactory";
 
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
@@ -46,7 +47,7 @@ export const authorizer = async (event: APIGatewayRequestAuthorizerEvent, _conte
     const jwt = await getValidJwt(auth, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
 
     envLogger(LogLevel.INFO, "Generating role policy");
-    const policy = generateRolePolicy(jwt, logEvent) ?? generateFunctionalPolicy(jwt);
+    const policy = generateMediaPolicy(jwt, event) ?? generateRolePolicy(jwt, logEvent) ?? generateFunctionalPolicy(jwt);
 
     if (policy !== undefined) {
       envLogger(LogLevel.INFO, "Role policy generated");
