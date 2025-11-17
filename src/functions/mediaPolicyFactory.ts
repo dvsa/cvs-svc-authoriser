@@ -14,7 +14,7 @@ export function generateMediaPolicy(jwt: Jwt, event: APIGatewayRequestAuthorizer
   }
 
   // Only PUT requests need to be authenticated against user ID
-  if (httpMethod !== 'PUT') {
+  if (httpMethod !== "PUT") {
     return undefined;
   }
 
