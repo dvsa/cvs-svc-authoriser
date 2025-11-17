@@ -6,10 +6,15 @@ import { Jwt, JwtPayload } from "jsonwebtoken";
 import { APIGatewayRequestAuthorizerEvent } from "aws-lambda/trigger/api-gateway-authorizer";
 
 export function generateMediaPolicy(jwt: Jwt, event: APIGatewayRequestAuthorizerEvent): APIGatewayAuthorizerResult | undefined {
-  const { methodArn, headers } = event;
+  const { methodArn, headers, httpMethod } = event;
 
   // If you're not looking at the media path, return undefined which will then resume normal role checks
   if (!methodArn.includes("cvs-media")) {
+    return undefined;
+  }
+
+  // Only PUT requests need to be authenticated against user ID
+  if (httpMethod !== 'PUT') {
     return undefined;
   }
 
