@@ -1,34 +1,29 @@
-import type { Context, Statement } from "aws-lambda";
+import { APIGatewayTokenAuthorizerEvent, Context, Statement } from "aws-lambda";
 import StatementBuilder from "../services/StatementBuilder";
-import { APIGatewayAuthorizerResult, APIGatewayRequestAuthorizerEvent } from "aws-lambda/trigger/api-gateway-authorizer";
+import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-authorizer";
 import { generatePolicy as generateRolePolicy } from "./rolePolicyFactory";
 import { generatePolicy as generateFunctionalPolicy } from "./functionalPolicyFactory";
 import { getValidJwt } from "../services/tokens";
 import { JWT_MESSAGE } from "../models/enums";
-import type { ILogEvent } from "../models/ILogEvent";
+import { ILogEvent } from "../models/ILogEvent";
 import { envLogger, LogLevel, writeLogMessage } from "../common/Logger";
 import newPolicyDocument from "./newPolicyDocument";
-import type { Jwt, JwtPayload } from "jsonwebtoken";
-import { generateVersionPolicy } from "./versionPolicyFactory";
-import { isVersionEndpointRequest } from "../services/version-endpoint-request-checker";
-import { generateMediaPolicy } from "./mediaPolicyFactory";
+import { Jwt, JwtPayload } from "jsonwebtoken";
 
 /**
  * Lambda custom authorizer function to verify whether a JWT has been provided
  * and to verify its integrity and validity.
  * @param event - AWS Lambda event object
- * @param _context
+ * @param context - AWS Lambda Context object
  * @returns - Promise<APIGatewayAuthorizerResult>
  */
-export const authorizer = async (event: APIGatewayRequestAuthorizerEvent, _context: Context): Promise<APIGatewayAuthorizerResult> => {
+export const authorizer = async (event: APIGatewayTokenAuthorizerEvent, context: Context): Promise<APIGatewayAuthorizerResult> => {
   const logEvent: ILogEvent = {};
 
   envLogger(LogLevel.DEBUG, "Invoked authoriser");
 
-  const auth = event.headers?.Authorization;
-
   if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID) {
-    writeLogMessage(auth, logEvent, JWT_MESSAGE.INVALID_ID_SETUP);
+    writeLogMessage(event, logEvent, JWT_MESSAGE.INVALID_ID_SETUP);
     return unauthorisedPolicy();
   }
 
@@ -37,30 +32,24 @@ export const authorizer = async (event: APIGatewayRequestAuthorizerEvent, _conte
   try {
     initialiseLogEvent(event);
 
-    // If the request is for to a /version endpoint, allow it through without checking the JWT
-    if (isVersionEndpointRequest(event.methodArn)) {
-      envLogger(LogLevel.INFO, "Version endpoint request");
-      return generateVersionPolicy();
-    }
-
     envLogger(LogLevel.INFO, "Getting valid JWT");
-    const jwt = await getValidJwt(auth, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
+    const jwt = await getValidJwt(event.authorizationToken, logEvent, process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID);
 
     envLogger(LogLevel.INFO, "Generating role policy");
-    const policy = generateMediaPolicy(jwt, event) ?? generateRolePolicy(jwt, logEvent) ?? generateFunctionalPolicy(jwt);
+    const policy = generateRolePolicy(jwt, logEvent) ?? generateFunctionalPolicy(jwt, logEvent);
 
     if (policy !== undefined) {
       envLogger(LogLevel.INFO, "Role policy generated");
       return policy;
     }
 
-    reportNoValidRoles(jwt, logEvent);
-    writeLogMessage(auth, logEvent, JWT_MESSAGE.INVALID_ROLES);
+    reportNoValidRoles(jwt, event, context, logEvent);
+    writeLogMessage(event, logEvent, JWT_MESSAGE.INVALID_ROLES);
 
     return unauthorisedPolicy();
   } catch (error: any) {
     envLogger(LogLevel.ERROR, "Catch - Error occurred", error);
-    writeLogMessage(auth, logEvent, error);
+    writeLogMessage(event, logEvent, error);
     return unauthorisedPolicy();
   }
 };
@@ -74,7 +63,7 @@ const unauthorisedPolicy = (): APIGatewayAuthorizerResult => {
   };
 };
 
-const reportNoValidRoles = (jwt: Jwt, logEvent: ILogEvent): void => {
+const reportNoValidRoles = (jwt: Jwt, event: APIGatewayTokenAuthorizerEvent, context: Context, logEvent: ILogEvent): void => {
   const roles = (jwt.payload as JwtPayload).roles;
   if (roles && roles.length === 0) {
     logEvent.message = JWT_MESSAGE.NO_ROLES;
@@ -87,7 +76,7 @@ const reportNoValidRoles = (jwt: Jwt, logEvent: ILogEvent): void => {
  * This method is being used in order to clear the ILogEvent, ILogError objects and populate the request url and the time of request
  * @param event
  */
-const initialiseLogEvent = (event: APIGatewayRequestAuthorizerEvent): ILogEvent => {
+const initialiseLogEvent = (event: APIGatewayTokenAuthorizerEvent): ILogEvent => {
   envLogger(LogLevel.DEBUG, "Init log event");
 
   return {

@@ -1,9 +1,10 @@
-import type { ILogEvent } from "../models/ILogEvent";
+import { ILogEvent } from "../models/ILogEvent";
 import { JWT_MESSAGE } from "../models/enums";
-import type { ILogError } from "../models/ILogError";
+import { ILogError } from "../models/ILogError";
 import { HttpStatus } from "@dvsa/cvs-microservice-common/api/http-status-codes";
+import { APIGatewayTokenAuthorizerEvent } from "aws-lambda";
 
-export const writeLogMessage = (authToken: string | undefined, log: ILogEvent, error?: any) => {
+export const writeLogMessage = (event: APIGatewayTokenAuthorizerEvent, log: ILogEvent, error?: any) => {
   if (!error) {
     log.statusCode = HttpStatus.OK;
     console.log(log);
@@ -12,7 +13,7 @@ export const writeLogMessage = (authToken: string | undefined, log: ILogEvent, e
     log.statusCode = HttpStatus.UNAUTHORIZED;
 
     // If the DEBUG_MODE env var is set to true, log the token - only applicable when errors occur
-    log.token = process.env.DEBUG_MODE === "true" ? authToken : undefined;
+    log.token = process.env.DEBUG_MODE === "true" ? event.authorizationToken : undefined;
 
     if (!error.name) {
       logError.message = error as string;
