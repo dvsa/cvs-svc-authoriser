@@ -119,8 +119,8 @@ describe("authorizer() unit tests", () => {
 
     (jwtJson.payload as typeof jwtJson.payload & { employeeId: string }) = {
       ...jwtJson.payload,
-      employeeId: '1234567'
-    }
+      employeeId: "1234567",
+    };
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
