@@ -1,8 +1,20 @@
-import axios from "axios";
 import { KeyResponse } from "../models/KeyResponse";
+import { envLogger, LogLevel } from "../common/Logger";
+
+const cache: Map<string, Map<string, string>> = new Map();
 
 export const getCertificateChain = async (tenantId: string, keyId: string): Promise<string> => {
-  const keys: Map<string, string> = await getKeys(tenantId);
+  const cacheKeys = cache.get(tenantId);
+
+  envLogger(LogLevel.DEBUG, `Cache ${cacheKeys ? "hit" : "not hit"}`);
+
+  const keys: Map<string, string> = cacheKeys ?? (await getKeys(tenantId));
+
+  envLogger(LogLevel.DEBUG, "Public keys read");
+
+  if (!cache.has(tenantId)) {
+    cache.set(tenantId, keys);
+  }
 
   const certificateChain = keys.get(keyId);
 
@@ -14,11 +26,11 @@ export const getCertificateChain = async (tenantId: string, keyId: string): Prom
 };
 
 const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
-  const response = await axios.get(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
+  const response = await fetchKeys(tenantId);
 
   const map: Map<string, string> = new Map();
 
-  const resp: KeyResponse = response.data;
+  const resp: KeyResponse = await response.json();
 
   for (const key of resp.keys) {
     const keyId = key.kid;
@@ -26,5 +38,12 @@ const getKeys = async (tenantId: string): Promise<Map<string, string>> => {
 
     map.set(keyId, certificateChain);
   }
+
+  envLogger(LogLevel.DEBUG, "Key Map Created");
   return map;
+};
+
+export const fetchKeys = (tenantId: string) => {
+  envLogger(LogLevel.DEBUG, `Fetching keys from https://login.microsoftonline.com/${tenantId}/discovery/keys`);
+  return fetch(`https://login.microsoftonline.com/${tenantId}/discovery/keys`);
 };
