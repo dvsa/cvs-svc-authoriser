@@ -5,6 +5,21 @@ export interface IApiAccess {
   path: string;
 }
 
+export const coreFunctionalConfig: IApiAccess[] = [
+  {
+    verbs: ["GET", "OPTIONS"],
+    path: "minimum-version",
+  },
+  {
+    verbs: ["GET", "OPTIONS"],
+    path: "feature-flags/*",
+  },
+  {
+    verbs: ["POST", "OPTIONS"],
+    path: "log",
+  },
+];
+
 export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
   "TechRecord.Amend": [
     {
@@ -19,6 +34,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["POST", "PUT", "PATCH", "OPTIONS"],
       path: "v3/technical-records/*",
     },
+    ...coreFunctionalConfig,
   ],
   "TechRecord.Create": [
     {
@@ -45,6 +61,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["POST"],
       path: "v3/technical-records",
     },
+    ...coreFunctionalConfig,
   ],
   "TechRecord.View": [
     {
@@ -59,23 +76,30 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "v3/technical-records/*",
     },
+    ...coreFunctionalConfig,
   ],
   "TechRecord.Archive": [
     {
       verbs: ["PUT", "OPTIONS"],
       path: "vehicles/archive/*",
     },
+    ...coreFunctionalConfig,
   ],
   "TechRecord.Unarchive": [
     {
       verbs: ["POST", "OPTIONS"],
       path: "vehicles/unarchive/*",
     },
+    ...coreFunctionalConfig,
   ],
   "TestResult.CreateDeskBased": [
     {
       verbs: ["POST", "OPTIONS"],
       path: "test-results",
+    },
+    {
+      verbs: ["GET"],
+      path: "test-stations",
     },
     {
       verbs: ["GET", "OPTIONS"],
@@ -97,6 +121,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "test-types/*",
     },
+    ...coreFunctionalConfig,
   ],
   "TestResult.CreateContingency": [
     {
@@ -112,6 +137,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "test-types/*",
     },
     {
+      verbs: ["GET"],
+      path: "test-stations",
+    },
+    {
       verbs: ["GET", "OPTIONS"],
       path: "test-stations/*",
     },
@@ -123,6 +152,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "reference/*",
     },
+    ...coreFunctionalConfig,
   ],
   "TestResult.Amend": [
     {
@@ -138,6 +168,10 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       path: "test-types/*",
     },
     {
+      verbs: ["GET"],
+      path: "test-stations",
+    },
+    {
       verbs: ["GET", "OPTIONS"],
       path: "test-stations/*",
     },
@@ -149,6 +183,7 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "reference/*",
     },
+    ...coreFunctionalConfig,
   ],
   "TestResult.View": [
     {
@@ -167,17 +202,24 @@ export const functionConfig: { [key: string]: NonEmptyArray<IApiAccess> } = {
       verbs: ["GET", "OPTIONS"],
       path: "v1/document-retrieval",
     },
+    {
+      verbs: ["GET", "OPTIONS"],
+      path: "v1/document-retrieval/*",
+    },
+    ...coreFunctionalConfig,
   ],
   "ReferenceData.View": [
     {
       verbs: ["GET", "OPTIONS"],
       path: "reference/*",
     },
+    ...coreFunctionalConfig,
   ],
   "ReferenceData.Amend": [
     {
       verbs: ["GET", "OPTIONS", "PUT", "POST", "DELETE"],
       path: "reference/*",
     },
+    ...coreFunctionalConfig,
   ],
 };

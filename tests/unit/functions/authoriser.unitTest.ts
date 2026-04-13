@@ -5,6 +5,7 @@ import { APIGatewayAuthorizerResult } from "aws-lambda/trigger/api-gateway-autho
 import { getLegacyRoles } from "../../../src/services/roles";
 import jwtJson from "../../resources/jwt.json";
 import { getValidJwt } from "../../../src/services/tokens";
+import { coreFunctionalConfig } from "../../../src/functions/functionalConfig";
 
 const event: APIGatewayTokenAuthorizerEvent = {
   type: "TOKEN",
@@ -36,6 +37,11 @@ describe("authorizer() unit tests", () => {
     jwtJsonClone.payload.roles = ["CVSFullAccess.read"];
     (getValidJwt as jest.Mock) = jest.fn().mockReturnValue(jwtJsonClone);
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
+    expect(returnValue.context).toEqual({
+      email: jwtJsonClone.payload.preferred_username,
+      msOid: jwtJsonClone.payload.oid,
+      username: jwtJsonClone.payload.name,
+    });
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
     expect(returnValue.policyDocument.Statement.length).toEqual(2);
     expect(returnValue.policyDocument.Statement).toContainEqual({
@@ -57,8 +63,12 @@ describe("authorizer() unit tests", () => {
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
+    expect(returnValue.context).toEqual({
+      email: jwtJsonClone.payload.preferred_username,
+      msOid: jwtJsonClone.payload.oid,
+      username: jwtJsonClone.payload.name,
+    });
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-
     expect(returnValue.policyDocument.Statement.length).toEqual(1);
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
@@ -74,8 +84,12 @@ describe("authorizer() unit tests", () => {
 
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
+    expect(returnValue.context).toEqual({
+      email: jwtJsonClone.payload.preferred_username,
+      msOid: jwtJsonClone.payload.oid,
+      username: jwtJsonClone.payload.name,
+    });
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-
     expect(returnValue.policyDocument.Statement.length).toEqual(4);
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
@@ -99,15 +113,26 @@ describe("authorizer() unit tests", () => {
     });
   });
 
-  it("should return valid view statement on valid JWT", async () => {
+  it("should return valid view statement on valid JWT with employeeId", async () => {
     (getLegacyRoles as jest.Mock) = jest.fn().mockReturnValue([]);
     jwtJson.payload.roles = ["TechRecord.View"];
 
+    (jwtJson.payload as typeof jwtJson.payload & { employeeId: string }) = {
+      ...jwtJson.payload,
+      employeeId: "1234567",
+    };
+
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
+    expect(returnValue.context).toEqual({
+      email: jwtJson.payload.preferred_username,
+      msOid: jwtJson.payload.oid,
+      // @ts-ignore
+      employeeId: jwtJson.payload.employeeId,
+      username: jwtJson.payload.name,
+    });
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-
-    expect(returnValue.policyDocument.Statement.length).toEqual(6);
+    expect(returnValue.policyDocument.Statement.length).toEqual(coreFunctionalConfig.length * 2 + 6);
     expect(returnValue.policyDocument.Statement).toContainEqual({
       Effect: "Allow",
       Action: "execute-api:Invoke",
@@ -122,7 +147,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(13);
+    expect(returnValue.policyDocument.Statement.length).toEqual(coreFunctionalConfig.length * 2 + 13);
   });
 
   it("should return an accurate policy based on functional roles", async () => {
@@ -131,7 +156,7 @@ describe("authorizer() unit tests", () => {
     const returnValue: APIGatewayAuthorizerResult = await authorizer(event, exampleContext());
 
     expect(returnValue.principalId).toEqual(jwtJson.payload.sub);
-    expect(returnValue.policyDocument.Statement.length).toEqual(13);
+    expect(returnValue.policyDocument.Statement.length).toEqual(coreFunctionalConfig.length * 2 + 13);
 
     const post: { Action: string; Effect: string; Resource: string } = returnValue.policyDocument.Statement[0] as unknown as { Action: string; Effect: string; Resource: string };
     expect(post.Effect).toEqual("Allow");
