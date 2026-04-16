@@ -1,89 +1,15 @@
-import { APIGatewayAuthorizerResult, Statement } from "aws-lambda";
-import { Jwt } from "jsonwebtoken";
-import { AccessHttpVerbMap } from "../models/AccessHttpVerbMap";
-import { ILogEvent } from "../models/ILogEvent";
-import { HttpVerb } from "../services/http-verbs";
-import Role, { getLegacyRoles } from "../services/roles";
-import StatementBuilder from "../services/StatementBuilder";
-import newPolicyDocument from "./newPolicyDocument";
+export function toAllVerbsAndAllResources(methodArn: string): string {
+  const parts = methodArn?.split("/");
 
-type NonEmptyArray<T> = [T, ...T[]];
-
-const accessToHttpVerbs: AccessHttpVerbMap = {
-  read: ["GET", "HEAD"],
-  write: ["*"],
-};
-
-const Configuration: AuthorizerConfig = {
-  CVSFullAccess: ["/*"],
-  CVSPsvTester: ["/*"],
-  CVSHgvTester: ["/*"],
-  CVSAdrTester: ["/*"],
-  CVSTirTester: ["/*"],
-  VTMAdmin: ["/*"],
-  Certs: ["/v1/document-retrieval", "/v1/document-retrieval/*"],
-  VehicleData: ["/v1/enquiry", "/v1/enquiry/*"],
-  DVLATrailers: ["/v1/trailers", "/v1/trailers/*"],
-};
-
-interface AuthorizerConfig {
-  [key: string]: NonEmptyArray<string>;
-}
-
-const getAssociatedResources = (role: Role): string[] => {
-  if (Configuration[role.name] !== undefined) {
-    return Configuration[role.name];
+  if (!parts || parts.length < 2) {
+    const methodArnText = typeof methodArn === "string" ? `"${methodArn}"` : `(${methodArn})`;
+    throw new Error(`Failed to extract arnBase and stageName from methodArn: ${methodArnText}`);
   }
 
-  return [];
-};
+  const arnBase = parts[0];
+  const stageName = parts[1];
+  const httpVerb = "*";
+  const resourcePath = "*";
 
-const roleToStatements = (role: Role): Statement[] => {
-  const associatedResources: string[] = getAssociatedResources(role);
-
-  let statements: Statement[] = [];
-
-  for (const associatedResource of associatedResources) {
-    const parts = associatedResource.substring(1).split("/");
-    const resource = parts[0];
-
-    let childResource: string | null = null;
-
-    if (parts.length > 1) {
-      childResource = parts.slice(1).join("/");
-    }
-
-    if (Object.keys(accessToHttpVerbs).includes(role.access)) {
-      statements = [...statements, ...accessToHttpVerbs[role.access].map((httpVerb) => roleToStatement(resource, childResource, httpVerb))];
-    }
-  }
-  return statements;
-};
-
-const roleToStatement = (resource: string, childResource: string | null, httpVerb: HttpVerb): Statement => {
-  return new StatementBuilder().setEffect("Allow").setHttpVerb(httpVerb).setResource(resource).setChildResource(childResource).build();
-};
-
-export function generatePolicy(jwt: Jwt, logEvent: ILogEvent): APIGatewayAuthorizerResult | undefined {
-  let statements: Statement[] = [];
-
-  const legacyRoles: Role[] = getLegacyRoles(jwt, logEvent);
-
-  if (!legacyRoles || legacyRoles.length === 0) {
-    return undefined;
-  }
-
-  for (const role of legacyRoles) {
-    const items = roleToStatements(role);
-    statements = statements.concat(items);
-  }
-
-  if (!statements || statements.length === 0) {
-    return undefined;
-  }
-
-  return {
-    principalId: jwt.payload.sub as string,
-    policyDocument: newPolicyDocument(statements),
-  };
+  return `${arnBase}/${stageName}/${httpVerb}/${resourcePath}`;
 }

@@ -1,112 +1,148 @@
+import { APIGatewayTokenAuthorizerEvent } from "aws-lambda";
+import { envLogger, LogLevel, writeLogMessage } from "../../../src/common/Logger";
 import { ILogError } from "../../../src/models/ILogError";
 import { ILogEvent } from "../../../src/models/ILogEvent";
 import errorLogEvent from "../../resources/errorLogEvent.json";
-import { writeLogMessage } from "../../../src/common/Logger";
 import successLogEvent from "../../resources/successLogEvent.json";
-import Role from "../../../src/services/roles";
-import { APIGatewayTokenAuthorizerEvent } from "aws-lambda";
 
-describe("test writeLogMessage method", () => {
-  const logError: ILogError = {};
-  const logErrorEvent: ILogEvent = errorLogEvent;
+describe("writeLogMessage()", () => {
   const mockEvent = {} as APIGatewayTokenAuthorizerEvent;
-  logErrorEvent.roles = [{ name: "test", access: "read" }] as Role[];
 
   beforeEach(() => {
-    // reset the value of DEBUG_MODE for every test
-    process.env.DEBUG_MODE = undefined;
+    delete process.env.DEBUG_MODE;
+    jest.spyOn(console, "log").mockImplementation(jest.fn());
+    jest.spyOn(console, "error").mockImplementation(jest.fn());
   });
 
-  describe("when only the log event is passed in", () => {
-    it("should return no errors", () => {
-      const returnValue: ILogEvent = writeLogMessage(mockEvent, successLogEvent, null);
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-      expect(returnValue.statusCode).toBe(200);
+  it("sets a successful status code when no error is passed", () => {
+    const logEvent: ILogEvent = { ...successLogEvent };
+
+    const returnValue = writeLogMessage(mockEvent, logEvent);
+
+    expect(returnValue.statusCode).toBe(200);
+    expect(console.log).toHaveBeenCalledWith(returnValue);
+  });
+
+  it("formats TokenExpiredError messages", () => {
+    const logEvent: ILogEvent = { ...errorLogEvent };
+    const error: ILogError = { name: "TokenExpiredError", message: "Error" };
+
+    const returnValue = writeLogMessage(mockEvent, logEvent, error);
+
+    expect(returnValue.statusCode).toBe(401);
+    expect(returnValue.error).toEqual({
+      name: "TokenExpiredError",
+      message: "[JWT-ERROR-07] Error at undefined",
     });
   });
 
-  describe("when log event and error are passed in", () => {
-    it("should log TokenExpiredError", () => {
-      const error: ILogError = { name: "TokenExpiredError", message: "Error" };
-      console.log = jest.fn();
-
-      logError.name = "TokenExpiredError";
-      const returnValue: ILogEvent = writeLogMessage(mockEvent, logErrorEvent, error);
-
-      expect(returnValue.error?.name).toBe("TokenExpiredError");
-      expect(returnValue.error?.message).toBe("[JWT-ERROR-07] Error at undefined");
-      expect(returnValue.email).toBe(logErrorEvent.email);
-      expect(returnValue.roles).toBe(logErrorEvent.roles);
-    });
-  });
-
-  it("should log NotBeforeError", () => {
+  it("formats NotBeforeError messages", () => {
+    const logEvent: ILogEvent = { ...errorLogEvent };
     const error: ILogError = { name: "NotBeforeError" };
-    console.log = jest.fn();
 
-    logError.name = "NotBeforeError";
-    const returnValue: ILogEvent = writeLogMessage(mockEvent, logErrorEvent, error);
+    const returnValue = writeLogMessage(mockEvent, logEvent, error);
 
-    expect(returnValue.error?.name).toBe("NotBeforeError");
-    expect(returnValue.error?.message).toBe("[JWT-ERROR-08] undefined until undefined");
-    expect(returnValue.email).toBe(logErrorEvent.email);
-    expect(returnValue.roles).toBe(logErrorEvent.roles);
+    expect(returnValue.statusCode).toBe(401);
+    expect(returnValue.error).toEqual({
+      name: "NotBeforeError",
+      message: "[JWT-ERROR-08] undefined until undefined",
+    });
   });
 
-  it("should log JsonWebTokenError", () => {
+  it("formats JsonWebTokenError messages", () => {
+    const logEvent: ILogEvent = { ...errorLogEvent };
     const error: ILogError = { name: "JsonWebTokenError", message: "test" };
-    console.log = jest.fn();
 
-    logError.name = "JsonWebTokenError";
-    const returnValue: ILogEvent = writeLogMessage(mockEvent, logErrorEvent, error);
+    const returnValue = writeLogMessage(mockEvent, logEvent, error);
 
-    expect(returnValue.error?.name).toBe("JsonWebTokenError");
-    expect(returnValue.error?.message).toBe("[JWT-ERROR-09] test");
-    expect(returnValue.email).toBe(logErrorEvent.email);
-    expect(returnValue.roles).toBe(logErrorEvent.roles);
+    expect(returnValue.statusCode).toBe(401);
+    expect(returnValue.error).toEqual({
+      name: "JsonWebTokenError",
+      message: "[JWT-ERROR-09] test",
+    });
   });
 
-  it("should log the default error", () => {
+  it("keeps default error details", () => {
+    const logEvent: ILogEvent = { ...errorLogEvent };
     const error: ILogError = { name: "Error", message: "Error" };
-    console.log = jest.fn();
 
-    const returnValue: ILogEvent = writeLogMessage(mockEvent, logErrorEvent, error);
+    const returnValue = writeLogMessage(mockEvent, logEvent, error);
 
-    expect(returnValue.error?.name).toBe("Error");
-    expect(returnValue.error?.message).toBe("Error");
-    expect(returnValue.email).toBe(logErrorEvent.email);
-    expect(returnValue.roles).toBe(logErrorEvent.roles);
+    expect(returnValue.statusCode).toBe(401);
+    expect(returnValue.error).toEqual({
+      name: "Error",
+      message: "Error",
+    });
   });
 
-  it("should not log the authorizationToken when DEBUG_MODE is not set to true", () => {
+  it("does not log the authorization token by default", () => {
+    const logEvent: ILogEvent = { ...errorLogEvent };
     const error: ILogError = { name: "Error", message: "Error" };
 
-    const returnValue: ILogEvent = writeLogMessage(
+    const returnValue = writeLogMessage(
       {
         ...mockEvent,
         authorizationToken: errorLogEvent.token,
       },
-      logErrorEvent,
+      logEvent,
       error,
     );
 
     expect(returnValue.token).toBeUndefined();
   });
 
-  it("should log the authorizationToken when DEBUG_MODE is set to true", () => {
+  it("logs the authorization token when DEBUG_MODE is true", () => {
     process.env.DEBUG_MODE = "true";
-
+    const logEvent: ILogEvent = { ...errorLogEvent };
     const error: ILogError = { name: "Error", message: "Error" };
 
-    const returnValue: ILogEvent = writeLogMessage(
+    const returnValue = writeLogMessage(
       {
         ...mockEvent,
         authorizationToken: errorLogEvent.token,
       },
-      logErrorEvent,
+      logEvent,
       error,
     );
 
     expect(returnValue.token).toEqual(errorLogEvent.token);
+  });
+});
+
+describe("envLogger()", () => {
+  beforeEach(() => {
+    delete process.env.DEBUG;
+    jest.spyOn(console, "debug").mockImplementation(jest.fn());
+    jest.spyOn(console, "info").mockImplementation(jest.fn());
+    jest.spyOn(console, "warn").mockImplementation(jest.fn());
+    jest.spyOn(console, "error").mockImplementation(jest.fn());
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("does not log when DEBUG is disabled", () => {
+    envLogger(LogLevel.DEBUG, "message");
+
+    expect(console.debug).not.toHaveBeenCalled();
+  });
+
+  it("logs to the matching console method when DEBUG is enabled", () => {
+    process.env.DEBUG = "true";
+
+    envLogger(LogLevel.DEBUG, "debug");
+    envLogger(LogLevel.INFO, "info");
+    envLogger(LogLevel.WARN, "warn");
+    envLogger(LogLevel.ERROR, "error");
+
+    expect(console.debug).toHaveBeenCalledWith(["debug"]);
+    expect(console.info).toHaveBeenCalledWith(["info"]);
+    expect(console.warn).toHaveBeenCalledWith(["warn"]);
+    expect(console.error).toHaveBeenCalledWith(["error"]);
   });
 });

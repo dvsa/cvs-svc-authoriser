@@ -1,14 +1,8 @@
-import { decode, Jwt, JwtPayload, verify } from "jsonwebtoken";
+import { decode, Jwt } from "jsonwebtoken";
 import { JWT_MESSAGE } from "../models/enums";
-import { ILogEvent } from "../models/ILogEvent";
 import { checkSignature } from "./signature-check";
 
-interface CVSJWTPayload extends JwtPayload {
-  unique_name: string;
-  preferred_username: string;
-}
-
-export const getValidJwt = async (authorizationToken: string, logEvent: ILogEvent, tenantId: string, clientId: string): Promise<Jwt> => {
+export const getValidJwt = async (authorizationToken: string, tenantId: string, clientId: string): Promise<Jwt> => {
   checkFormat(authorizationToken);
 
   authorizationToken = authorizationToken.substring(7); // remove 'Bearer '
@@ -18,23 +12,6 @@ export const getValidJwt = async (authorizationToken: string, logEvent: ILogEven
   if (!decoded) {
     throw new Error(JWT_MESSAGE.DECODE_FAILED);
   }
-
-  let username;
-  const payload = decoded.payload as CVSJWTPayload;
-
-  if (!payload) {
-    username = "No data available in token";
-  } else {
-    if (payload.preferred_username) {
-      username = payload.preferred_username;
-    } else {
-      username = payload.unique_name;
-    }
-  }
-
-  logEvent.email = username;
-  logEvent.roles = (decoded.payload as JwtPayload).roles;
-  logEvent.tokenExpiry = new Date((payload.exp as number) * 1000).toISOString();
 
   await checkSignature(authorizationToken, decoded, tenantId, clientId);
 

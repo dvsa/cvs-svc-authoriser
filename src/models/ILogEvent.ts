@@ -1,14 +1,11 @@
-import Role from "../services/roles";
 import { ILogError } from "./ILogError";
-import { HttpStatus } from "@dvsa/cvs-microservice-common/api/http-status-codes";
 
 export interface ILogEvent {
   requestUrl?: string;
   timeOfRequest?: string;
-  statusCode?: HttpStatus;
+  statusCode?: number;
   email?: string;
   tokenExpiry?: string;
-  roles?: Role[];
   message?: string;
   error?: ILogError;
   /**

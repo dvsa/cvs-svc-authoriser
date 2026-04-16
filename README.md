@@ -1,9 +1,9 @@
-# cvs-svc-authoriser
+# hvt-svc-authoriser
 
-Custom authentication and authorisation mechanism for all CVS API Gateway calls.
+Custom authentication and authorisation mechanism for all HVT API Gateway calls.
 
-- Calls to CVS APIG trigger Lambda handler [authorizer.ts][authorizer-ts], as described on [AWS Lambda Authorizer Input][lambda-authorizer-input].
-- This Lambda will return a policy document, as described on [AWS Lambda Authorizer Input][lambda-authorizer-input].
+- Calls to HVT APIG trigger Lambda handler.
+- This Lambda will return a policy document, either allowing or denying access to the wider service.
 
 ## Documentation
 
@@ -92,7 +92,7 @@ On Windows, you will need to use [Git Bash][git-bash]. You may also need to:
 npm test
 ```
 
-This project only contains unit tests. For integration tests, see [cvs-svc-auto][cvs-svc-auto].
+This project only contains unit tests.
 
 ## Local Invocation
 
@@ -116,23 +116,3 @@ If there is any reason the token does not allow access to the resource the reaso
 ```
 
 If the token does allow access, the request will be allowed through to the test function and `"Test function successfully invoked. Access was granted."` is returned in the response.
-
-### Debugging
-
-A debug configuration has been added that runs `npm start` under a debug session. Testing is performed via postman as described above.
-
-[confluence]: https://wiki.dvsacloud.uk/display/HVT/Lambda+Authoriser
-[nvm]: https://github.com/nvm-sh/nvm
-[nvm-windows]: https://github.com/coreybutler/nvm-windows
-[nodejs]: https://nodejs.org
-[homebrew]: https://brew.sh
-[chocolatey]: https://chocolatey.org
-[git-bash]: https://git-scm.com/downloads
-[save-exact]: https://docs.npmjs.com/cli/v6/using-npm/config#save-exact
-[cvs-svc-auto]: https://github.com/dvsa/cvs-auto-svc
-[authorizer-ts]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/src/functions/authorizer.ts
-[configuration-ts]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/src/services/configuration.ts
-[fake-config]: https://github.com/dvsa/cvs-svc-authoriser/blob/develop/tests/resources/config-test.yml
-[lambda-authorizer-input]: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-input.html
-[lambda-authorizer-output]: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
-[serverless-offline]: https://www.serverless.com/plugins/serverless-offline

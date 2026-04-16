@@ -1,4 +1,4 @@
-service: cvs-svc-authoriser
+service: hvt-svc-authoriser
 
 plugins:
   - serverless-offline
